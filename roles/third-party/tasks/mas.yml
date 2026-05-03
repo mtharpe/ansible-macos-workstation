@@ -1,0 +1,29 @@
+---
+# Requires `mas` CLI (installed via the common/packages role) and an
+# already-signed-in App Store account. mas cannot sign you in non-
+# interactively on modern macOS.
+- name: Check Mac App Store sign-in status
+  ansible.builtin.command: mas account
+  register: mas_account
+  changed_when: false
+  failed_when: false
+
+- name: Warn if not signed in to the App Store
+  ansible.builtin.debug:
+    msg: |
+      `mas` reports you are not signed in to the App Store. Open the
+      App Store app, sign in, then re-run this play. Skipping mas_apps
+      installs for this run.
+  when: mas_account.rc != 0
+
+- name: Install Mac App Store apps
+  ansible.builtin.command: "mas install {{ item.key }}"
+  loop: "{{ mas_apps | dict2items }}"
+  loop_control:
+    label: "{{ item.value }} ({{ item.key }})"
+  register: mas_install
+  changed_when: "'Installed' in mas_install.stdout or 'Installing' in mas_install.stdout"
+  failed_when:
+    - mas_install.rc != 0
+    - "'Already installed' not in mas_install.stderr"
+  when: mas_account.rc == 0

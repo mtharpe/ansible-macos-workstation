@@ -1,0 +1,44 @@
+---
+# All macOS settings are gated on Darwin so converging on a Linux
+# container is a no-op for this role.
+- name: Apply macOS global defaults
+  ansible.builtin.import_tasks: defaults.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_defaults | default(true)
+
+- name: Apply Finder settings
+  ansible.builtin.import_tasks: finder.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_finder | default(true)
+
+- name: Apply Dock settings + layout
+  ansible.builtin.import_tasks: dock.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_dock | default(true)
+
+- name: Apply menu bar settings
+  ansible.builtin.import_tasks: menubar.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_menubar | default(true)
+
+- name: Apply keyboard settings
+  ansible.builtin.import_tasks: keyboard.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_keyboard | default(true)
+
+- name: Apply trackpad settings
+  ansible.builtin.import_tasks: trackpad.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_trackpad | default(true)
+
+- name: Apply screenshot settings
+  ansible.builtin.import_tasks: screenshots.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_screenshots | default(true)

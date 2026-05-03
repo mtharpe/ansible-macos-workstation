@@ -1,0 +1,21 @@
+---
+- name: Check if Homebrew is installed
+  ansible.builtin.stat:
+    path: /opt/homebrew/bin/brew
+  register: homebrew_check
+
+- name: Check intel Homebrew location as fallback
+  ansible.builtin.stat:
+    path: /usr/local/bin/brew
+  register: homebrew_intel_check
+  when: not homebrew_check.stat.exists
+
+- name: Install Homebrew if missing
+  ansible.builtin.shell:
+    cmd: |
+      NONINTERACTIVE=1 /bin/bash -c \
+        "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  when:
+    - not homebrew_check.stat.exists
+    - not (homebrew_intel_check.stat.exists | default(false))
+  changed_when: true

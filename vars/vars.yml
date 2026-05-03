@@ -1,0 +1,216 @@
+---
+
+# User
+local_user: tharpem
+local_user_email: mtharpe@users.noreply.github.com
+
+# Header stamped into rendered config files via `{{ ansible_managed }}`.
+# Replaces the deprecated DEFAULT_MANAGED_STR setting in ansible.cfg.
+ansible_managed: "Ansible managed — do not edit by hand"
+
+# Homebrew taps — third-party formula sources
+homebrew_taps:
+  - hashicorp/tap
+  - weaveworks/tap
+
+# Homebrew formulae (command-line tools)
+homebrew_formulae:
+  # Cloud & Container Tools
+  - awscli
+  - colima
+  - docker
+  - docker-credential-helper
+  - helm
+  - hashicorp/tap/packer
+  - hashicorp/tap/terraform
+  - hashicorp/tap/terraform-ls
+  - hashicorp/tap/tf-migrate
+  - hashicorp/tap/tfstacks
+  - hashicorp/tap/vault
+  - lima-additional-guestagents
+  - opentofu
+  - weaveworks/tap/eksctl
+
+  # Development Tools
+  - autoconf  # noqa: nothing  (explicit list, kept for parity)
+  - automake
+  - cmake
+  - direnv
+  - gh
+  - git
+  - git-lfs
+  - make
+  - neovim
+  - shellcheck
+  - termcolor
+  - wails
+
+  # Shell & Terminal
+  - fish
+  - starship
+  - tmux
+
+  # CLI Utilities
+  - bat
+  - coreutils
+  - curl
+  - eza
+  - ffmpeg
+  - htop
+  - jq
+  - nmap
+  - ripgrep
+  - watch
+  - wget
+
+  # Multimedia / Imaging
+  - ghostscript
+  - imagemagick
+  - cdrtools
+
+  # Dock management (used by macos role)
+  - dockutil
+
+  # Mac App Store CLI (used by third-party role for MAS apps)
+  - mas
+
+# Homebrew casks (GUI applications) — installed unconditionally
+homebrew_casks:
+  - appcleaner
+  - balenaetcher
+  - gcloud-cli
+  - ghostty
+  - ollama-app
+  - sensiblesidebuttons
+  # Nerd Fonts
+  - font-fira-code-nerd-font
+  - font-jetbrains-mono-nerd-font
+  - font-hack-nerd-font
+  - font-meslo-lg-nerd-font
+  - font-symbols-only-nerd-font
+
+# Third-party application toggles. Each maps to a cask install in
+# roles/third-party. Toggle these per-machine without editing tasks.
+install_1password: true
+install_bambu_studio: true
+install_chrome: true
+install_claude: true
+install_cleanmymac: true
+install_cursor: true
+install_google_drive: true
+install_inkscape: true
+install_logi_options_plus: true
+install_microsoft_office: true
+install_nextcloud: true
+install_orbstack: true
+install_pixelmator_pro: true
+install_slack: true
+install_twingate: true
+install_vscode: true
+install_zoom: true
+
+# Mac App Store apps — `id: name` pairs. mas IDs (find with `mas search <app>`).
+# Empty by default to avoid surprise installs; populated entries install via
+# the `mas` CLI. The user must already be signed in to the App Store.
+mas_apps:
+  # 409183694: "Keynote"
+  # 409201541: "Pages"
+  # 409203825: "Numbers"
+  # 1333542190: "1Password 7 - Password Manager"   # legacy
+  # 490461369: "Okta Verify"
+  # 1295203466: "Microsoft Remote Desktop"          # now "Windows App"
+  {}
+
+# Shell / dotfile toggles
+install_fish: true
+install_starship: true
+install_tmux: true
+install_ghostty_config: true
+install_htop_config: true
+install_lxc_config: true
+install_gh_config: true
+install_ssh_config: true
+install_git_config: true
+
+# Git Configuration
+git_user_name: "Michael Tharpe"
+git_user_email: "mtharpe@users.noreply.github.com"
+# Git signing key is managed by 1Password SSH agent
+git_gpg_program: "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+
+# Fish Shell Configuration
+fish_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/fish"
+docker_socket_path: "{{ ansible_facts['env']['HOME'] }}/.colima/default/docker.sock"
+
+# macOS toggles
+configure_macos_defaults: true
+configure_macos_dock: true
+configure_macos_menubar: true
+configure_macos_keyboard: true
+configure_macos_screenshots: true
+configure_macos_trackpad: true
+configure_macos_finder: true
+
+# General macOS settings
+macos_dark_mode: true
+macos_show_all_extensions: true
+macos_expand_save_panel: true
+
+# Dock layout — applied by `dockutil` in roles/macos/tasks/dock.yml.
+# This list represents the current workstation's Dock as captured at
+# repository setup. Edit to taste; entries point at .app bundles, system
+# apps live under /System/Applications.
+macos_dock_apps:
+  - /Applications/Google Chrome.app
+  - /System/Applications/Mail.app
+  - /System/Applications/Calendar.app
+  - /System/Applications/Reminders.app
+  - /System/Applications/Notes.app
+  - /System/Applications/Messages.app
+  - /Applications/Slack.app
+  - /Applications/Visual Studio Code.app
+  - /Applications/Claude.app
+  - /Applications/Ghostty.app
+  - /Applications/zoom.us.app
+
+# Dock folders / stacks (right of separator)
+macos_dock_folders:
+  - path: /Applications
+    display: folder    # folder | stack
+    view: grid         # fan | grid | list | auto
+    sort: name         # name | dateadded | datemodified | datecreated | kind
+  - path: ~/Downloads
+    display: stack
+    view: auto
+    sort: dateadded
+
+# Dock layout/behavior
+macos_dock_position: "left"   # left | bottom | right
+macos_dock_tilesize: 35
+macos_dock_autohide: true
+macos_dock_minimize_to_app: true
+macos_dock_show_recents: false
+macos_dock_magnification: false
+
+# Menu Bar / Clock
+macos_menubar_clock_show_date: false
+macos_menubar_clock_show_day_of_week: true
+macos_menubar_clock_24hour: false
+
+# Keyboard
+macos_enable_key_repeat: true   # true => disable press-and-hold accents
+macos_key_repeat_rate: 2        # lower = faster
+macos_initial_key_repeat: 30    # lower = shorter delay
+
+# Screenshots
+macos_screenshot_location: "~/Library/Mobile Documents/com~apple~CloudDocs/Pictures/Screenshots"
+macos_screenshot_type: "png"
+macos_screenshot_disable_shadow: false
+
+# Trackpad
+macos_trackpad_tap_to_click: true
+macos_trackpad_tracking_speed: 1.0
+
+# Misc UX
+macos_disable_quarantine_dialog: true
+macos_disable_autocorrect: true

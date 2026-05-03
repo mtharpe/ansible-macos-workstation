@@ -1,0 +1,16 @@
+---
+- name: Enable tap to click for trackpad (Bluetooth)
+  community.general.osx_defaults:
+    domain: com.apple.driver.AppleBluetoothMultitouch.trackpad
+    key: Clicking
+    type: int
+    value: "{{ 1 if macos_trackpad_tap_to_click else 0 }}"
+    state: present
+
+- name: Set trackpad tracking speed
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: com.apple.trackpad.scaling
+    type: float
+    value: "{{ macos_trackpad_tracking_speed }}"
+    state: present

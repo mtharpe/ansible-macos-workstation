@@ -1,0 +1,34 @@
+---
+- name: Ensure screenshot location directory exists
+  ansible.builtin.file:
+    path: "{{ macos_screenshot_location | expanduser }}"
+    state: directory
+    mode: '0755'
+  when: macos_screenshot_location is not match('^~/Library/Mobile Documents/')
+
+- name: Set screenshot save location
+  community.general.osx_defaults:
+    domain: com.apple.screencapture
+    key: location
+    type: string
+    value: "{{ macos_screenshot_location }}"
+    state: present
+  notify: Restart SystemUIServer
+
+- name: Set screenshot format
+  community.general.osx_defaults:
+    domain: com.apple.screencapture
+    key: type
+    type: string
+    value: "{{ macos_screenshot_type }}"
+    state: present
+  notify: Restart SystemUIServer
+
+- name: Disable shadow in screenshots
+  community.general.osx_defaults:
+    domain: com.apple.screencapture
+    key: disable-shadow
+    type: bool
+    value: "{{ macos_screenshot_disable_shadow }}"
+    state: present
+  notify: Restart SystemUIServer

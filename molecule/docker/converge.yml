@@ -1,0 +1,24 @@
+---
+- name: Converge all roles
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    local_user: testuser
+
+  pre_tasks:
+    - name: Detect container environment
+      ansible.builtin.set_fact:
+        is_container: "{{ ansible_facts['virtualization_type'] | default('') in
+          ['container', 'docker', 'podman', 'lxc', 'systemd-nspawn', 'oci'] }}"
+
+    - name: Ensure test user exists
+      ansible.builtin.user:
+        name: "{{ local_user }}"
+        state: present
+
+  roles:
+    - role: common
+    - role: third-party
+    - role: macos
+      when: ansible_facts['os_family'] == 'Darwin'

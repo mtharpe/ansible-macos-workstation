@@ -1,0 +1,12 @@
+---
+- name: Ensure htop config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/htop"
+    state: directory
+    mode: '0700'
+
+- name: Template htoprc
+  ansible.builtin.template:
+    src: htoprc.j2
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/htop/htoprc"
+    mode: '0644'

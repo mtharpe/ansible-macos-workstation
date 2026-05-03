@@ -1,0 +1,32 @@
+---
+- name: Ensure fish config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/fish"
+    state: directory
+    mode: '0755'
+
+- name: Template fish config
+  ansible.builtin.template:
+    src: config.fish.j2
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/fish/config.fish"
+    mode: '0644'
+
+- name: Check if fish is in /etc/shells
+  ansible.builtin.command: grep -q "/opt/homebrew/bin/fish" /etc/shells
+  register: shell_fish_in_shells
+  failed_when: false
+  changed_when: false
+
+- name: Add fish to /etc/shells
+  ansible.builtin.lineinfile:
+    path: /etc/shells
+    line: /opt/homebrew/bin/fish
+    state: present
+  become: true
+  when: shell_fish_in_shells.rc != 0
+
+- name: Change user shell to fish
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    shell: /opt/homebrew/bin/fish
+  become: true

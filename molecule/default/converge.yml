@@ -1,0 +1,30 @@
+---
+# macOS-specific tasks (homebrew, osx_defaults, dockutil) are guarded with
+# `ansible_facts['os_family'] == 'Darwin'`, so converging on a Linux
+# container exercises only the playbook structure and any portable tasks.
+# CI runs `molecule syntax` for parse-only validation; this converge file
+# exists for parity with the fedora/ubuntu/manjaro repos and so that a
+# local `make test-podman` does not error on a missing scenario.
+- name: Converge all roles
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    local_user: testuser
+
+  pre_tasks:
+    - name: Detect container environment
+      ansible.builtin.set_fact:
+        is_container: "{{ ansible_facts['virtualization_type'] | default('') in
+          ['container', 'docker', 'podman', 'lxc', 'systemd-nspawn', 'oci'] }}"
+
+    - name: Ensure test user exists
+      ansible.builtin.user:
+        name: "{{ local_user }}"
+        state: present
+
+  roles:
+    - role: common
+    - role: third-party
+    - role: macos
+      when: ansible_facts['os_family'] == 'Darwin'

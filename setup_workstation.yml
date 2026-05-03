@@ -1,0 +1,28 @@
+---
+- name: Setup Workstation
+  hosts: workstation
+  become: false
+  gather_facts: true
+
+  vars_files:
+    - vars/vars.yml
+
+  pre_tasks:
+    - name: Detect container environment
+      ansible.builtin.set_fact:
+        is_container: "{{ ansible_facts['virtualization_type'] | default('') in
+          ['container', 'docker', 'podman', 'lxc', 'systemd-nspawn', 'oci'] }}"
+
+    - name: Bootstrap Homebrew
+      ansible.builtin.import_tasks: roles/common/tasks/homebrew_bootstrap.yml
+      when:
+        - ansible_facts['os_family'] == 'Darwin'
+        - not is_container | default(false)
+
+  roles:
+    - common
+    - third-party
+    - macos
+
+  handlers:
+    - ansible.builtin.import_tasks: handlers/main.yml

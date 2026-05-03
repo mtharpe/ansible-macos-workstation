@@ -1,0 +1,95 @@
+---
+- name: Set Dock icon size
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: tilesize
+    type: int
+    value: "{{ macos_dock_tilesize | default(48) }}"
+    state: present
+  notify: Restart Dock
+
+- name: Set Dock position
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: orientation
+    type: string
+    value: "{{ macos_dock_position }}"
+    state: present
+  notify: Restart Dock
+
+- name: Set Dock autohide
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: autohide
+    type: bool
+    value: "{{ macos_dock_autohide | default(true) }}"
+    state: present
+  notify: Restart Dock
+
+- name: Minimize windows into application icon
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: minimize-to-application
+    type: bool
+    value: "{{ macos_dock_minimize_to_app }}"
+    state: present
+  notify: Restart Dock
+
+- name: Show recent applications in Dock
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: show-recents
+    type: bool
+    value: "{{ macos_dock_show_recents }}"
+    state: present
+  notify: Restart Dock
+
+- name: Enable Dock magnification
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: magnification
+    type: bool
+    value: "{{ macos_dock_magnification }}"
+    state: present
+  notify: Restart Dock
+
+# Dock layout — uses dockutil (installed via common/packages.yml).
+# Strategy: read the current Dock once with `dockutil --list`, then add only
+# entries that are missing. This keeps the play idempotent: a fully-correct
+# Dock reports zero changes on the second run.
+- name: Locate dockutil
+  ansible.builtin.command: which dockutil
+  register: dockutil_bin
+  changed_when: false
+  failed_when: dockutil_bin.rc != 0
+
+- name: Read current Dock contents
+  ansible.builtin.command: "{{ dockutil_bin.stdout }} --list"
+  register: dock_current
+  changed_when: false
+
+- name: Add Dock app entries (only if missing)
+  ansible.builtin.command: >
+    {{ dockutil_bin.stdout }} --add "{{ item }}" --no-restart
+  loop: "{{ macos_dock_apps | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: (item | basename | regex_replace('\\.app$', '')) not in dock_current.stdout
+  register: dock_app_added
+  changed_when: dock_app_added.rc == 0
+  notify: Restart Dock
+
+- name: Add Dock folders / stacks (only if missing)
+  ansible.builtin.command: >
+    {{ dockutil_bin.stdout }} --add "{{ item.path }}"
+    --view {{ item.view | default('auto') }}
+    --display {{ item.display | default('folder') }}
+    --sort {{ item.sort | default('name') }}
+    --no-restart
+  loop: "{{ macos_dock_folders | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: (item.path | basename) not in dock_current.stdout
+  register: dock_folder_added
+  changed_when: dock_folder_added.rc == 0
+  notify: Restart Dock

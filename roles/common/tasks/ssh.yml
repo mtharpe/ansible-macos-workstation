@@ -1,0 +1,12 @@
+---
+- name: Ensure SSH directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.ssh"
+    state: directory
+    mode: '0700'
+
+- name: Template SSH config (1Password agent integration)
+  ansible.builtin.template:
+    src: ssh-config.j2
+    dest: "{{ ansible_facts['env']['HOME'] }}/.ssh/config"
+    mode: '0644'

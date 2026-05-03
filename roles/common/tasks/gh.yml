@@ -1,0 +1,12 @@
+---
+- name: Ensure GitHub CLI config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/gh"
+    state: directory
+    mode: '0700'
+
+- name: Template gh config
+  ansible.builtin.template:
+    src: gh-config.yml.j2
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/gh/config.yml"
+    mode: '0600'

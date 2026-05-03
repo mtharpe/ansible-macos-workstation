@@ -1,0 +1,49 @@
+---
+- name: Detect container environment
+  ansible.builtin.set_fact:
+    is_container: "{{ ansible_facts['virtualization_type'] | default('') in
+      ['container', 'docker', 'podman', 'lxc', 'systemd-nspawn', 'oci'] }}"
+
+- name: Setup Homebrew taps and packages
+  ansible.builtin.import_tasks: packages.yml
+  when: ansible_facts['os_family'] == 'Darwin'
+
+- name: Setup fish shell
+  ansible.builtin.import_tasks: shell.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - install_fish | default(true)
+
+- name: Setup tmux
+  ansible.builtin.import_tasks: tmux.yml
+  when: install_tmux | default(true)
+
+- name: Setup starship
+  ansible.builtin.import_tasks: starship.yml
+  when: install_starship | default(true)
+
+- name: Setup ghostty config
+  ansible.builtin.import_tasks: ghostty.yml
+  when: install_ghostty_config | default(true)
+
+- name: Setup htop config
+  ansible.builtin.import_tasks: htop.yml
+  when: install_htop_config | default(true)
+
+- name: Setup gh config
+  ansible.builtin.import_tasks: gh.yml
+  when: install_gh_config | default(true)
+
+- name: Setup lxc config
+  ansible.builtin.import_tasks: lxc.yml
+  when: install_lxc_config | default(true)
+
+- name: Setup ssh config
+  ansible.builtin.import_tasks: ssh.yml
+  when:
+    - install_ssh_config | default(true)
+    - ansible_facts['os_family'] == 'Darwin'
+
+- name: Setup git config
+  ansible.builtin.import_tasks: git.yml
+  when: install_git_config | default(true)

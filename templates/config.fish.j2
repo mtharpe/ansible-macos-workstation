@@ -1,0 +1,65 @@
+# {{ ansible_managed }}
+# Fish shell configuration
+
+# PATH — prefer GNU coreutils/findutils/grep/sed from Homebrew
+export PATH="(brew --prefix coreutils)/libexec/gnubin:(brew --prefix findutils)/libexec/gnubin:(brew --prefix grep)/libexec/gnubin:(brew --prefix gnu-sed)/libexec/gnubin:$PATH"
+
+# Docker / Colima
+set -gx DOCKER_HOST "unix://{{ docker_socket_path }}"
+
+# Abbreviations
+abbr -a python python3
+
+# Aliases
+alias c='clear'
+alias ls='eza -l --group-directories-first --git'
+alias ll='eza -l --icons --git'
+alias la='eza -la --icons --git'
+alias lt='eza --tree --level=2 --icons'
+alias sum="shasum -a 256"
+alias ssh_keygen="ssh-keygen -b 4096 -C (date +%Y-%m-%d)"
+alias git_all="printf '\\n' && find . -maxdepth 4 -type d -name '.git' -execdir python3 -c 'import os; from termcolor import colored, cprint; cprint(colored(os.path.abspath(\".\"), \"blue\"))' \; -execdir git pull \;"
+alias vault_login='vault login -method=userpass username={{ local_user }}'
+
+# Terraform project scaffold
+function tfnew --description "Create a new Terraform project directory and files"
+    if test (count $argv) -eq 0
+        echo "Usage: tfnew <directory_name>"
+        return 1
+    end
+
+    set dir_name $argv[1]
+
+    if test -d $dir_name
+        echo "Error: Directory '$dir_name' already exists."
+        return 1
+    end
+
+    mkdir $dir_name
+    touch $dir_name/main.tf
+    touch $dir_name/variables.tf
+    touch $dir_name/outputs.tf
+    touch $dir_name/.gitignore
+
+    echo ".terraform/" >> $dir_name/.gitignore
+    echo "*.tfstate" >> $dir_name/.gitignore
+    echo "*.tfstate.backup" >> $dir_name/.gitignore
+    echo "*.tfvars" >> $dir_name/.gitignore
+
+    cd $dir_name
+    echo "Terraform project '$dir_name' created successfully."
+end
+
+# Prompt + tooling integrations
+if type -q starship
+    starship init fish | source
+end
+
+if type -q direnv
+    direnv hook fish | source
+end
+
+# Added by OrbStack: command-line tools and integration
+if test -f ~/.orbstack/shell/init2.fish
+    source ~/.orbstack/shell/init2.fish 2>/dev/null
+end

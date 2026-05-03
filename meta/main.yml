@@ -1,0 +1,12 @@
+galaxy_info:
+  role_name: macos_workstation
+  namespace: mtharpe
+  author: Michael Tharpe
+  description: macOS Workstation Base Role
+  company: ""
+  license: Apache-2.0
+  min_ansible_version: "2.14"
+  platforms:
+    - name: MacOSX
+      versions:
+        - all

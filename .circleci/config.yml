@@ -1,0 +1,94 @@
+---
+version: 2.1
+
+executors:
+  python:
+    docker:
+      - image: cimg/python:3.12
+  shellcheck:
+    docker:
+      - image: koalaman/shellcheck-alpine:stable
+
+jobs:
+  ansible-lint:
+    executor: python
+    steps:
+      - checkout
+      - run:
+          name: Install Ansible tooling
+          command: |
+            python -m pip install --upgrade pip
+            python -m pip install ansible ansible-lint
+      - run:
+          name: ansible-lint
+          command: ansible-lint .
+
+  yamllint:
+    executor: python
+    steps:
+      - checkout
+      - run:
+          name: Install yamllint
+          command: |
+            python -m pip install --upgrade pip
+            python -m pip install yamllint
+      - run:
+          name: yamllint
+          command: yamllint .
+
+  syntax-check:
+    executor: python
+    steps:
+      - checkout
+      - run:
+          name: Install Ansible and required collections
+          command: |
+            python -m pip install --upgrade pip
+            python -m pip install ansible
+            ansible-galaxy collection install community.general ansible.posix
+      - run:
+          name: ansible-playbook --syntax-check
+          command: ansible-playbook --syntax-check setup_workstation.yml
+
+  molecule-syntax:
+    executor: python
+    steps:
+      - checkout
+      - run:
+          name: Install Molecule and required collections
+          command: |
+            python -m pip install --upgrade pip
+            python -m pip install ansible "molecule-plugins[docker,podman]"
+            ansible-galaxy collection install community.general ansible.posix community.docker containers.podman
+      - run:
+          # Only the default (podman) scenario is parsed here. The docker
+          # scenario is structurally identical and the docker driver tries
+          # to contact a daemon at syntax time — which doesn't exist in the
+          # CircleCI docker executor. Validating the default scenario covers
+          # both since the converge.yml is shared.
+          name: molecule syntax (default scenario)
+          command: molecule syntax -s default
+
+  shellcheck:
+    executor: shellcheck
+    steps:
+      - checkout
+      - run:
+          name: shellcheck
+          command: |
+            shellcheck run.sh
+            find . -name '*.sh' \
+              -not -path './.git/*' \
+              -not -path './.ansible/*' \
+              -not -path './templates/*' \
+              -not -path './roles/*/templates/*' \
+              -print0 | xargs -0 -r shellcheck
+
+workflows:
+  validate:
+    jobs:
+      - ansible-lint
+      - yamllint
+      - syntax-check
+      - molecule-syntax
+      - shellcheck

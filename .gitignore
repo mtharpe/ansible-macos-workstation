@@ -1,0 +1,18 @@
+# Ansible
+*.retry
+.vault_pass
+.ansible/
+
+# Caches
+.cache
+.kitchen*
+
+# OS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/

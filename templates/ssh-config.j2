@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+# Added by OrbStack: 'orb' SSH host for Linux machines.
+# Must remain at the top of ssh_config (before any Host blocks) to take
+# effect. This won't be added again if you remove it.
+Include ~/.orbstack/ssh/config
+
+Include {{ ansible_facts['env']['HOME'] }}/.colima/ssh_config
+Host *
+        StrictHostKeyChecking no
+        IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"

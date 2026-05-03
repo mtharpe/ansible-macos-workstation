@@ -1,0 +1,36 @@
+---
+- name: Configure Git user name
+  community.general.git_config:
+    name: user.name
+    scope: global
+    value: "{{ git_user_name }}"
+
+- name: Configure Git user email
+  community.general.git_config:
+    name: user.email
+    scope: global
+    value: "{{ git_user_email }}"
+
+- name: Configure init.defaultBranch
+  community.general.git_config:
+    name: init.defaultBranch
+    scope: global
+    value: main
+
+- name: Configure GPG format to SSH
+  community.general.git_config:
+    name: gpg.format
+    scope: global
+    value: ssh
+
+- name: Configure GPG SSH program (1Password)
+  community.general.git_config:
+    name: gpg.ssh.program
+    scope: global
+    value: "{{ git_gpg_program }}"
+
+- name: Enable commit GPG signing
+  community.general.git_config:
+    name: commit.gpgsign
+    scope: global
+    value: "true"

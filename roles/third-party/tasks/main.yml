@@ -1,0 +1,41 @@
+---
+# All third-party apps install via Homebrew Cask. Each entry is a
+# `{flag, cask}` pair; only entries whose flag is true are installed.
+- name: Build enabled third-party cask list
+  ansible.builtin.set_fact:
+    enabled_third_party_casks: "{{ third_party_apps | selectattr('flag', 'equalto', true) | map(attribute='cask') | list }}"
+  vars:
+    third_party_apps:
+      - {flag: "{{ install_1password | default(false) }}", cask: 1password}
+      - {flag: "{{ install_bambu_studio | default(false) }}", cask: bambu-studio}
+      - {flag: "{{ install_chrome | default(false) }}", cask: google-chrome}
+      - {flag: "{{ install_claude | default(false) }}", cask: claude}
+      - {flag: "{{ install_cleanmymac | default(false) }}", cask: cleanmymac}
+      - {flag: "{{ install_cursor | default(false) }}", cask: cursor}
+      - {flag: "{{ install_google_drive | default(false) }}", cask: google-drive}
+      - {flag: "{{ install_inkscape | default(false) }}", cask: inkscape}
+      - {flag: "{{ install_logi_options_plus | default(false) }}", cask: logi-options-plus}
+      - {flag: "{{ install_microsoft_office | default(false) }}", cask: microsoft-office}
+      - {flag: "{{ install_nextcloud | default(false) }}", cask: nextcloud}
+      - {flag: "{{ install_orbstack | default(false) }}", cask: orbstack}
+      - {flag: "{{ install_pixelmator_pro | default(false) }}", cask: pixelmator-pro}
+      - {flag: "{{ install_slack | default(false) }}", cask: slack}
+      - {flag: "{{ install_twingate | default(false) }}", cask: twingate}
+      - {flag: "{{ install_vscode | default(false) }}", cask: visual-studio-code}
+      - {flag: "{{ install_zoom | default(false) }}", cask: zoom}
+  when: ansible_facts['os_family'] == 'Darwin'
+
+- name: Install enabled third-party casks
+  community.general.homebrew_cask:
+    name: "{{ enabled_third_party_casks }}"
+    state: present
+    accept_external_apps: true
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - enabled_third_party_casks | default([]) | length > 0
+
+- name: Install Mac App Store apps
+  ansible.builtin.import_tasks: mas.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - mas_apps | default({}) | length > 0
