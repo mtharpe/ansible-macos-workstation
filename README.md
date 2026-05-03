@@ -12,7 +12,7 @@ Configures a macOS workstation with:
 - **Third-party apps** — 1Password, Chrome, Slack, VS Code, Cursor, Claude, Zoom, Pixelmator Pro, Inkscape, etc., gated by `install_*` flags (`roles/third-party`)
 - **macOS settings** — sensible `defaults`, dark mode, Finder, Dock layout (via `dockutil`), menu-bar clock, keyboard repeat, trackpad, screenshots (`roles/macos`)
 - **Shell setup** — fish + Starship + tmux (TPM), with FiraCode/JetBrains/Hack/Meslo Nerd Fonts
-- **Dotfiles** — fish config, tmux config, ghostty config, htop config, gh config, lxc config, ssh config (1Password agent), git config (1Password SSH signing)
+- **Dotfiles** — fish config, tmux config, ghostty config, htop config, gh config, ssh config (1Password agent), git config (1Password SSH signing)
 
 ## Requirements
 

@@ -127,7 +127,6 @@ install_starship: true
 install_tmux: true
 install_ghostty_config: true
 install_htop_config: true
-install_lxc_config: true
 install_gh_config: true
 install_ssh_config: true
 install_git_config: true

@@ -34,10 +34,6 @@
   ansible.builtin.import_tasks: gh.yml
   when: install_gh_config | default(true)
 
-- name: Setup lxc config
-  ansible.builtin.import_tasks: lxc.yml
-  when: install_lxc_config | default(true)
-
 - name: Setup ssh config
   ansible.builtin.import_tasks: ssh.yml
   when:

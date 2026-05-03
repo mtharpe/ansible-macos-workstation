@@ -5,9 +5,13 @@
     state: present
   loop: "{{ homebrew_taps | default([]) }}"
 
+# Run `brew update` every play but never report it as a change — `brew
+# update` reports changed whenever any tap fetches new formula info,
+# which would make the play non-idempotent on its own.
 - name: Update Homebrew
   community.general.homebrew:
     update_homebrew: true
+  changed_when: false
 
 - name: Install Homebrew formulae
   community.general.homebrew:
