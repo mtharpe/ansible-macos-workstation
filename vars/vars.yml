@@ -202,7 +202,7 @@ macos_key_repeat_rate: 2        # lower = faster
 macos_initial_key_repeat: 30    # lower = shorter delay
 
 # Screenshots
-macos_screenshot_location: "~/Library/Mobile Documents/com~apple~CloudDocs/Pictures/Screenshots"
+macos_screenshot_location: "~/Pictures/Screenshots"
 macos_screenshot_type: "png"
 macos_screenshot_disable_shadow: false
 
