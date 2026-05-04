@@ -42,3 +42,43 @@
   when:
     - ansible_facts['os_family'] == 'Darwin'
     - configure_macos_screenshots | default(true)
+
+- name: Apply system performance limits
+  ansible.builtin.import_tasks: performance.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_performance | default(true)
+    - not is_container | default(false)
+
+- name: Trim UI animations
+  ansible.builtin.import_tasks: animations.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_animations | default(true)
+
+- name: Apply power / hibernation tuning
+  ansible.builtin.import_tasks: power.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_power | default(true)
+    - not is_container | default(false)
+
+- name: Apply Spotlight excludes
+  ansible.builtin.import_tasks: spotlight.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_macos_spotlight | default(true)
+
+- name: Pin Colima VM resources
+  ansible.builtin.import_tasks: colima.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - not is_container | default(false)
+
+- name: Apply Chrome managed policies
+  ansible.builtin.import_tasks: chrome.yml
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - configure_chrome_policies | default(true)
+    - install_chrome | default(false)
+    - not is_container | default(false)

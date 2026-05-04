@@ -1,0 +1,19 @@
+---
+# Reclaim disk equal to physical RAM and stop writing the hibernate
+# image on sleep. Safe on machines that don't migrate state across a
+# dead battery; macOS still does standard sleep.
+- name: Disable hibernation image writes
+  ansible.builtin.command: pmset -a hibernatemode 0
+  become: true
+  changed_when: false
+
+- name: Remove existing sleepimage
+  ansible.builtin.file:
+    path: /var/vm/sleepimage
+    state: absent
+  become: true
+
+- name: Disable sudden motion sensor (no-op on Apple Silicon)
+  ansible.builtin.command: pmset -a sms 0
+  become: true
+  changed_when: false

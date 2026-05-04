@@ -1,0 +1,48 @@
+---
+# Chrome managed policies — written to the system-wide plist Chrome
+# reads on launch when no MDM-managed profile is present. Restart Chrome
+# for changes to take effect; verify in chrome://policy.
+- name: Set Chrome Memory Saver availability
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.google.Chrome
+    key: MemorySaverModeAvailability
+    type: int
+    value: "{{ chrome_memory_saver_availability }}"
+    state: present
+  become: true
+
+- name: Set Chrome Battery Saver availability
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.google.Chrome
+    key: BatterySaverModeAvailability
+    type: int
+    value: "{{ chrome_battery_saver_availability }}"
+    state: present
+  become: true
+
+- name: Set Chrome background mode
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.google.Chrome
+    key: BackgroundModeEnabled
+    type: bool
+    value: "{{ chrome_background_mode_enabled }}"
+    state: present
+  become: true
+
+- name: Set Chrome hardware acceleration
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.google.Chrome
+    key: HardwareAccelerationModeEnabled
+    type: bool
+    value: "{{ chrome_hardware_acceleration_enabled }}"
+    state: present
+  become: true
+
+- name: Set Chrome restore-on-startup behavior
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.google.Chrome
+    key: RestoreOnStartup
+    type: int
+    value: "{{ chrome_restore_on_startup }}"
+    state: present
+  become: true

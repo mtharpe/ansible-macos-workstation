@@ -1,0 +1,65 @@
+---
+# Raise system-wide soft/hard limits for open files and processes via
+# LaunchDaemons. macOS ships with maxfiles=256, which heavy multi-profile
+# Chrome, containers, and language servers blow through quickly. New
+# limits apply to processes started after the daemon loads (effectively
+# next login / reboot).
+- name: Install maxfiles LaunchDaemon
+  ansible.builtin.copy:
+    dest: /Library/LaunchDaemons/limit.maxfiles.plist
+    owner: root
+    group: wheel
+    mode: "0644"
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>limit.maxfiles</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>launchctl</string>
+            <string>limit</string>
+            <string>maxfiles</string>
+            <string>{{ macos_maxfiles_soft }}</string>
+            <string>{{ macos_maxfiles_hard }}</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>ServiceIPC</key>
+          <false/>
+        </dict>
+      </plist>
+  become: true
+  notify: Load maxfiles LaunchDaemon
+
+- name: Install maxproc LaunchDaemon
+  ansible.builtin.copy:
+    dest: /Library/LaunchDaemons/limit.maxproc.plist
+    owner: root
+    group: wheel
+    mode: "0644"
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>limit.maxproc</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>launchctl</string>
+            <string>limit</string>
+            <string>maxproc</string>
+            <string>{{ macos_maxproc_soft }}</string>
+            <string>{{ macos_maxproc_hard }}</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>ServiceIPC</key>
+          <false/>
+        </dict>
+      </plist>
+  become: true
+  notify: Load maxproc LaunchDaemon

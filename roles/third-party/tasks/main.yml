@@ -1,9 +1,51 @@
 ---
-# All third-party apps install via Homebrew Cask. Each entry is a
-# `{flag, cask}` pair; only entries whose flag is true are installed.
-- name: Build enabled third-party cask list
+# Detect which casks are managed by an org MDM (Jamf, Intune, etc.).
+# For each cask in `managed_apps_bundle_ids`, check whether MDM has
+# pushed a configuration plist for that bundle into
+# /Library/Managed Preferences/. If yes, we leave the cask alone —
+# don't install over the MDM-deployed copy, don't try to uninstall it.
+- name: Detect MDM-managed casks
+  ansible.builtin.shell: |
+    bundle="{{ item.value }}"
+    if find "/Library/Managed Preferences/" "/Library/Managed Preferences/${USER}/" \
+         -maxdepth 1 -name "${bundle}*.plist" 2>/dev/null | grep -q .; then
+      echo managed
+    fi
+  args:
+    executable: /bin/bash
+  loop: "{{ managed_apps_bundle_ids | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: mdm_managed_check
+  changed_when: false
+  when: ansible_facts['os_family'] == 'Darwin'
+
+- name: Build skip-casks list from MDM detection
   ansible.builtin.set_fact:
-    enabled_third_party_casks: "{{ third_party_apps | selectattr('flag', 'equalto', true) | map(attribute='cask') | list }}"
+    skip_casks: >-
+      {{ mdm_managed_check.results
+         | default([])
+         | selectattr('stdout', 'defined')
+         | selectattr('stdout', 'equalto', 'managed')
+         | map(attribute='item.key')
+         | list }}
+  when: ansible_facts['os_family'] == 'Darwin'
+
+- name: Report MDM-managed casks being skipped
+  ansible.builtin.debug:
+    msg: "Skipping (MDM-managed): {{ skip_casks }}"
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - skip_casks | default([]) | length > 0
+
+# All third-party apps install via Homebrew Cask. Each entry is a
+# `{flag, cask}` pair; entries with flag=true are installed, flag=false
+# are uninstalled (so flipping a flag off cleans up after itself).
+# Casks present in `skip_casks` are excluded from both lists.
+- name: Build third-party cask lists
+  ansible.builtin.set_fact:
+    enabled_third_party_casks: "{{ third_party_apps | selectattr('flag', 'equalto', true) | map(attribute='cask') | reject('in', skip_casks | default([])) | list }}"
+    disabled_third_party_casks: "{{ third_party_apps | rejectattr('flag', 'equalto', true) | map(attribute='cask') | reject('in', skip_casks | default([])) | list }}"
   vars:
     third_party_apps:
       - {flag: "{{ install_1password | default(false) }}", cask: 1password}
@@ -15,15 +57,93 @@
       - {flag: "{{ install_google_drive | default(false) }}", cask: google-drive}
       - {flag: "{{ install_inkscape | default(false) }}", cask: inkscape}
       - {flag: "{{ install_logi_options_plus | default(false) }}", cask: logi-options-plus}
-      - {flag: "{{ install_microsoft_office | default(false) }}", cask: microsoft-office}
+      # Microsoft Office is force-disabled in its entirety. The bundle
+      # cask, the standalone Teams cask, and the per-app casks are all
+      # listed with flag=false so brew uninstalls any of them if present
+      # and never reinstalls. The .app files are wiped via apps_to_remove
+      # in case they were installed by something other than brew.
+      - {flag: false, cask: microsoft-office}
+      - {flag: false, cask: microsoft-teams}
+      - {flag: false, cask: microsoft-word}
+      - {flag: false, cask: microsoft-excel}
+      - {flag: false, cask: microsoft-powerpoint}
       - {flag: "{{ install_nextcloud | default(false) }}", cask: nextcloud}
       - {flag: "{{ install_orbstack | default(false) }}", cask: orbstack}
-      - {flag: "{{ install_pixelmator_pro | default(false) }}", cask: pixelmator-pro}
+      # Pixelmator Pro is Mac App Store only — managed via mas_apps.
       - {flag: "{{ install_slack | default(false) }}", cask: slack}
       - {flag: "{{ install_twingate | default(false) }}", cask: twingate}
+      - {flag: "{{ install_vagrant | default(false) }}", cask: hashicorp-vagrant}
       - {flag: "{{ install_vscode | default(false) }}", cask: visual-studio-code}
       - {flag: "{{ install_zoom | default(false) }}", cask: zoom}
   when: ansible_facts['os_family'] == 'Darwin'
+
+# Remove apps the user doesn't want on the machine. Covers bundles
+# from other installers (Google Drive ships Docs/Sheets/Slides) and
+# leftovers from prior manual installs. `become: true` because some
+# are root-owned.
+- name: Remove unwanted apps from /Applications
+  ansible.builtin.file:
+    path: "/Applications/{{ item }}"
+    state: absent
+  loop: "{{ apps_to_remove | default([]) }}"
+  become: true
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - apps_to_remove | default([]) | length > 0
+
+# Uninstall casks whose flag is false so flipping `install_X: true → false`
+# also cleans up the brew side. `failed_when: false` because the cask may
+# never have been installed on this machine. The sudo prompt for .pkg
+# casks is handled by the SUDO_ASKPASS helper exported from run.sh.
+- name: Uninstall disabled third-party casks
+  community.general.homebrew_cask:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ disabled_third_party_casks | default([]) }}"
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - disabled_third_party_casks | default([]) | length > 0
+  failed_when: false
+
+# For each enabled cask that isn't already brew-managed, ask brew which
+# .app artifacts it would install. We use the bare `brew info` output
+# (not --json) to avoid a jq dependency; the "==> Artifacts" section
+# lists each artifact with its type in parentheses, e.g.
+#   Google Chrome.app (App)
+# so we grep for "(App)" lines and strip the suffix.
+- name: Discover .app artifacts for enabled casks not yet brew-managed
+  ansible.builtin.shell: |
+    cask="{{ item }}"
+    if brew list --cask --versions "$cask" >/dev/null 2>&1; then
+      exit 0
+    fi
+    brew info --cask "$cask" 2>/dev/null \
+      | awk '/^==> Artifacts$/{f=1; next} /^==>/{f=0} f && /\(App\)$/{ sub(/ \(App\)$/, ""); print }' \
+      || true
+  args:
+    executable: /bin/bash
+  register: cask_app_artifacts
+  changed_when: false
+  loop: "{{ enabled_third_party_casks | default([]) }}"
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - enabled_third_party_casks | default([]) | length > 0
+
+# Remove any existing /Applications/<X>.app that brew is about to
+# install, if it wasn't installed by brew. Without this, brew aborts
+# (or, with --force, tries to chown over Apple-protected files and
+# fails with "Operation not permitted"). `become: true` because the
+# existing app may be root-owned.
+- name: Remove non-brew apps that would conflict with enabled casks
+  ansible.builtin.file:
+    path: "/Applications/{{ item }}"
+    state: absent
+  loop: "{{ cask_app_artifacts.results | default([]) | map(attribute='stdout_lines') | flatten | unique }}"
+  become: true
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - cask_app_artifacts is defined
+    - (cask_app_artifacts.results | default([]) | map(attribute='stdout_lines') | flatten | length) > 0
 
 - name: Install enabled third-party casks
   community.general.homebrew_cask:

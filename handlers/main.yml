@@ -13,3 +13,15 @@
   ansible.builtin.command: killall SystemUIServer
   changed_when: false
   failed_when: false
+
+- name: Load maxfiles LaunchDaemon
+  ansible.builtin.command: launchctl load -w /Library/LaunchDaemons/limit.maxfiles.plist
+  become: true
+  changed_when: true
+  failed_when: false
+
+- name: Load maxproc LaunchDaemon
+  ansible.builtin.command: launchctl load -w /Library/LaunchDaemons/limit.maxproc.plist
+  become: true
+  changed_when: true
+  failed_when: false

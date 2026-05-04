@@ -7,11 +7,14 @@
     value: "{{ not macos_enable_key_repeat }}"
     state: present
 
+# macOS stores KeyRepeat / InitialKeyRepeat as floats once the
+# Keyboard pane has been opened, even though the values are whole
+# numbers. Write as float to match the existing type.
 - name: Set key repeat rate
   community.general.osx_defaults:
     domain: NSGlobalDomain
     key: KeyRepeat
-    type: int
+    type: float
     value: "{{ macos_key_repeat_rate }}"
     state: present
 
@@ -19,6 +22,6 @@
   community.general.osx_defaults:
     domain: NSGlobalDomain
     key: InitialKeyRepeat
-    type: int
+    type: float
     value: "{{ macos_initial_key_repeat }}"
     state: present

@@ -25,8 +25,14 @@
   become: true
   when: shell_fish_in_shells.rc != 0
 
+- name: Get current login shell
+  ansible.builtin.command: dscl . -read /Users/{{ ansible_facts['user_id'] | default(local_user) }} UserShell
+  register: shell_current_user_shell
+  changed_when: false
+
 - name: Change user shell to fish
   ansible.builtin.user:
-    name: "{{ ansible_user_id }}"
+    name: "{{ ansible_facts['user_id'] | default(local_user) }}"
     shell: /opt/homebrew/bin/fish
   become: true
+  when: "'/opt/homebrew/bin/fish' not in shell_current_user_shell.stdout"

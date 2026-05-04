@@ -11,6 +11,7 @@ ansible_managed: "Ansible managed — do not edit by hand"
 # Homebrew taps — third-party formula sources
 homebrew_taps:
   - hashicorp/tap
+  - tonidy/tools-tap
   - weaveworks/tap
 
 # Homebrew formulae (command-line tools)
@@ -59,9 +60,12 @@ homebrew_formulae:
   - htop
   - jq
   - nmap
+  - p7zip
   - ripgrep
+  - tonidy/tools-tap/mkpasswd
   - watch
   - wget
+  - whois
 
   # Multimedia / Imaging
   - ghostscript
@@ -95,31 +99,63 @@ install_1password: true
 install_bambu_studio: true
 install_chrome: true
 install_claude: true
-install_cleanmymac: true
+install_cleanmymac: false
 install_cursor: true
-install_google_drive: true
+install_google_drive: false
 install_inkscape: true
 install_logi_options_plus: true
-install_microsoft_office: true
+# Microsoft Office is force-disabled in roles/third-party (no toggle).
 install_nextcloud: true
-install_orbstack: true
-install_pixelmator_pro: true
+install_orbstack: false
 install_slack: true
 install_twingate: true
+install_vagrant: true
 install_vscode: true
 install_zoom: true
+
+# Casks whose lifecycle is owned by your org's MDM (Jamf, Intune, etc.).
+# At runtime we check /Library/Managed Preferences/ for a plist whose
+# name starts with the bundle-id prefix below; if found, the cask is
+# excluded from both install and uninstall steps so we don't fight MDM.
+# Map: cask name → bundle-id prefix (matches "<prefix>*.plist").
+# Extend with any other casks your org pushes via MDM.
+managed_apps_bundle_ids:
+  zoom: us.zoom
+  slack: com.tinyspeck.slackmacgap
+  # microsoft-edge: com.microsoft.edgemac
+  # google-chrome: com.google.Chrome
+  # 1password: com.1password
+
+# Apps to forcibly remove from /Applications. Use this for bloat the
+# user doesn't want — apps bundled with other installers (Google Drive
+# ships Docs/Sheets/Slides), leftovers from a prior install, etc.
+# Each entry is the .app directory name as it appears in /Applications.
+apps_to_remove:
+  - "Google Drive.app"
+  - "Google Docs.app"
+  - "Google Sheets.app"
+  - "Google Slides.app"
+  # Microsoft Office — fully removed.
+  - "Microsoft Word.app"
+  - "Microsoft Excel.app"
+  - "Microsoft PowerPoint.app"
+  - "Microsoft Outlook.app"
+  - "Microsoft OneNote.app"
+  - "Microsoft Teams.app"
+  - "Microsoft Teams classic.app"
+  - "OneDrive.app"
 
 # Mac App Store apps — `id: name` pairs. mas IDs (find with `mas search <app>`).
 # Empty by default to avoid surprise installs; populated entries install via
 # the `mas` CLI. The user must already be signed in to the App Store.
 mas_apps:
+  1289583905: "Pixelmator Pro"
   # 409183694: "Keynote"
   # 409201541: "Pages"
   # 409203825: "Numbers"
   # 1333542190: "1Password 7 - Password Manager"   # legacy
   # 490461369: "Okta Verify"
   # 1295203466: "Microsoft Remote Desktop"          # now "Windows App"
-  {}
 
 # Shell / dotfile toggles
 install_fish: true
@@ -149,6 +185,11 @@ configure_macos_keyboard: true
 configure_macos_screenshots: true
 configure_macos_trackpad: true
 configure_macos_finder: true
+configure_macos_performance: true
+configure_macos_animations: true
+configure_macos_power: true
+configure_macos_spotlight: true
+configure_chrome_policies: true
 
 # General macOS settings
 macos_dark_mode: true
@@ -168,7 +209,6 @@ macos_dock_apps:
   - /System/Applications/Messages.app
   - /Applications/Slack.app
   - /Applications/Visual Studio Code.app
-  - /Applications/Claude.app
   - /Applications/Ghostty.app
   - /Applications/zoom.us.app
 
@@ -186,7 +226,7 @@ macos_dock_folders:
 # Dock layout/behavior
 macos_dock_position: "left"   # left | bottom | right
 macos_dock_tilesize: 35
-macos_dock_autohide: true
+macos_dock_autohide: false
 macos_dock_minimize_to_app: true
 macos_dock_show_recents: false
 macos_dock_magnification: false
@@ -213,3 +253,45 @@ macos_trackpad_tracking_speed: 1.0
 # Misc UX
 macos_disable_quarantine_dialog: true
 macos_disable_autocorrect: true
+
+# System performance — raise file descriptor and process limits so heavy
+# multi-tab Chrome / containers / dev servers don't hit the macOS default
+# 256 open-files soft limit. Applied via /Library/LaunchDaemons plists so
+# the new ceilings are inherited by GUI apps after the next reboot.
+macos_maxfiles_soft: 524288
+macos_maxfiles_hard: 524288
+macos_maxproc_soft: 4096
+macos_maxproc_hard: 8192
+
+# Chrome managed policies — written to /Library/Preferences/com.google.Chrome.plist
+# (system-wide; takes effect on next Chrome launch). Tuned for running
+# many profiles with many tabs each: Memory Saver discards inactive tabs,
+# Background Mode off frees memory when the last window closes, hardware
+# acceleration on offloads rendering from the CPU.
+#
+#   MemorySaverModeAvailability: 0=disabled, 1=enabled, 2=user-controlled
+#   BatterySaverModeAvailability: 0=disabled, 1=enabled when unplugged, 2=always
+chrome_memory_saver_availability: 1
+chrome_battery_saver_availability: 1
+chrome_background_mode_enabled: false
+chrome_hardware_acceleration_enabled: true
+# RestoreOnStartup: 1=last session, 4=URL list, 5=new tab page.
+# Set to 5 to avoid the memory spike of every profile reloading every
+# tab on login.
+chrome_restore_on_startup: 5
+
+# Spotlight — exclude paths that churn constantly (build artifacts,
+# container volumes, caches). Reduces mds_stores CPU and disk I/O.
+macos_spotlight_excludes:
+  - "{{ ansible_facts['env']['HOME'] }}/.colima"
+  - "{{ ansible_facts['env']['HOME'] }}/.docker"
+  - "{{ ansible_facts['env']['HOME'] }}/.cache"
+  - "{{ ansible_facts['env']['HOME'] }}/Library/Caches"
+  - "{{ ansible_facts['env']['HOME'] }}/src"
+
+# Colima — pin VM memory so Docker doesn't claim half the box from
+# Chrome. Adjust per machine; 8 GiB / 4 CPU is a comfortable default
+# on a 24 GB host.
+colima_cpu: 4
+colima_memory_gib: 8
+colima_disk_gib: 100

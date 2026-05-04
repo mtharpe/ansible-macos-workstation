@@ -8,12 +8,15 @@
     state: present
   notify: Restart SystemUIServer
 
+# Sibling clock keys (ShowDate, Show24Hour) are integers, but
+# ShowDayOfWeek is stored as a boolean — Apple isn't internally
+# consistent here. Write as bool to match the existing type.
 - name: Show day of week in menu bar clock
   community.general.osx_defaults:
     domain: com.apple.menuextra.clock
     key: ShowDayOfWeek
-    type: int
-    value: "{{ 1 if macos_menubar_clock_show_day_of_week else 0 }}"
+    type: bool
+    value: "{{ macos_menubar_clock_show_day_of_week }}"
     state: present
   notify: Restart SystemUIServer
 

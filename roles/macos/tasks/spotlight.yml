@@ -1,0 +1,13 @@
+---
+# Tell Spotlight to skip noisy directories. mdutil/.metadata_never_index
+# is the supported per-volume mechanism; for paths inside $HOME we drop
+# a sentinel file Spotlight respects without touching system prefs.
+- name: Mark Spotlight excludes with .metadata_never_index
+  ansible.builtin.file:
+    path: "{{ item }}/.metadata_never_index"
+    state: touch
+    mode: "0644"
+    modification_time: preserve
+    access_time: preserve
+  loop: "{{ macos_spotlight_excludes }}"
+  failed_when: false

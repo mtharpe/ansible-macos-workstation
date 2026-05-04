@@ -1,0 +1,29 @@
+---
+# Pin Colima VM resources so Docker workloads don't elastic up to
+# half-host RAM and starve Chrome/IDEs. Edits the user's colima.yaml
+# in-place; takes effect on `colima restart`.
+- name: Locate colima default profile config
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.colima/default/colima.yaml"
+  register: macos_colima_cfg
+
+- name: Pin colima cpu
+  ansible.builtin.lineinfile:
+    path: "{{ macos_colima_cfg.stat.path }}"
+    regexp: '^cpu:\s*'
+    line: "cpu: {{ colima_cpu }}"
+  when: macos_colima_cfg.stat.exists
+
+- name: Pin colima memory
+  ansible.builtin.lineinfile:
+    path: "{{ macos_colima_cfg.stat.path }}"
+    regexp: '^memory:\s*'
+    line: "memory: {{ colima_memory_gib }}"
+  when: macos_colima_cfg.stat.exists
+
+- name: Pin colima disk
+  ansible.builtin.lineinfile:
+    path: "{{ macos_colima_cfg.stat.path }}"
+    regexp: '^disk:\s*'
+    line: "disk: {{ colima_disk_gib }}"
+  when: macos_colima_cfg.stat.exists
