@@ -57,16 +57,16 @@
       - {flag: "{{ install_google_drive | default(false) }}", cask: google-drive}
       - {flag: "{{ install_inkscape | default(false) }}", cask: inkscape}
       - {flag: "{{ install_logi_options_plus | default(false) }}", cask: logi-options-plus}
-      # Microsoft Office is force-disabled in its entirety. The bundle
-      # cask, the standalone Teams cask, and the per-app casks are all
-      # listed with flag=false so brew uninstalls any of them if present
-      # and never reinstalls. The .app files are wiped via apps_to_remove
-      # in case they were installed by something other than brew.
-      - {flag: false, cask: microsoft-office}
+      # Microsoft Office: keep Word/Excel/PowerPoint if already installed
+      # (whether via the `microsoft-office` bundle or per-app casks), so
+      # those casks are intentionally absent from this list. Teams,
+      # Outlook, and OneNote are force-disabled — if they were installed
+      # standalone via brew they get uninstalled here, and the .app files
+      # are wiped via apps_to_remove regardless of source (covers the
+      # case where the bundle dropped them in /Applications).
       - {flag: false, cask: microsoft-teams}
-      - {flag: false, cask: microsoft-word}
-      - {flag: false, cask: microsoft-excel}
-      - {flag: false, cask: microsoft-powerpoint}
+      - {flag: false, cask: microsoft-outlook}
+      - {flag: false, cask: microsoft-onenote}
       - {flag: "{{ install_nextcloud | default(false) }}", cask: nextcloud}
       - {flag: "{{ install_orbstack | default(false) }}", cask: orbstack}
       # Pixelmator Pro is Mac App Store only — managed via mas_apps.

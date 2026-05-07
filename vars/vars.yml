@@ -104,7 +104,9 @@ install_cursor: true
 install_google_drive: false
 install_inkscape: true
 install_logi_options_plus: true
-# Microsoft Office is force-disabled in roles/third-party (no toggle).
+# Microsoft Office: Word/Excel/PowerPoint are kept if installed; Teams,
+# Outlook, and OneNote are force-removed. Handled in roles/third-party
+# (cask uninstall) and apps_to_remove (.app deletion) below.
 install_nextcloud: true
 install_orbstack: false
 install_slack: true
@@ -135,10 +137,9 @@ apps_to_remove:
   - "Google Docs.app"
   - "Google Sheets.app"
   - "Google Slides.app"
-  # Microsoft Office — fully removed.
-  - "Microsoft Word.app"
-  - "Microsoft Excel.app"
-  - "Microsoft PowerPoint.app"
+  # Microsoft Office — remove Teams/Outlook/OneNote only. Word, Excel,
+  # and PowerPoint are intentionally NOT listed: keep them if installed
+  # (e.g. via the microsoft-office bundle or per-app casks).
   - "Microsoft Outlook.app"
   - "Microsoft OneNote.app"
   - "Microsoft Teams.app"

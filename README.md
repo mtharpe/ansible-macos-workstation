@@ -60,7 +60,6 @@ All toggles live in `vars/vars.yml`. The most useful ones:
 | `install_zoom` | `true` | Zoom |
 | `install_orbstack` | `true` | OrbStack (Linux + Docker for macOS) |
 | `install_google_drive` | `true` | Google Drive |
-| `install_microsoft_office` | `true` | Word/Excel/PowerPoint |
 | `install_pixelmator_pro` | `true` | Pixelmator Pro |
 | `install_inkscape` | `true` | Inkscape |
 | `install_bambu_studio` | `true` | Bambu Studio (3D printer slicer) |
