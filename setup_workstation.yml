@@ -25,4 +25,5 @@
     - macos
 
   handlers:
-    - ansible.builtin.import_tasks: handlers/main.yml
+    - name: Import global handlers
+      ansible.builtin.import_tasks: handlers/main.yml

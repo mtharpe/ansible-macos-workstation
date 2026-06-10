@@ -19,7 +19,7 @@
 
 - name: Check if fish is in /etc/shells
   ansible.builtin.command: grep -q "/opt/homebrew/bin/fish" /etc/shells
-  register: shell_fish_in_shells
+  register: common_shell_fish_in_shells
   failed_when: false
   changed_when: false
 
@@ -29,11 +29,11 @@
     line: /opt/homebrew/bin/fish
     state: present
   become: true
-  when: shell_fish_in_shells.rc != 0
+  when: common_shell_fish_in_shells.rc != 0
 
 - name: Get current login shell
   ansible.builtin.command: dscl . -read /Users/{{ ansible_facts['user_id'] | default(local_user) }} UserShell
-  register: shell_current_user_shell
+  register: common_shell_current_user_shell
   changed_when: false
 
 - name: Change user shell to fish
@@ -41,4 +41,4 @@
     name: "{{ ansible_facts['user_id'] | default(local_user) }}"
     shell: /opt/homebrew/bin/fish
   become: true
-  when: "'/opt/homebrew/bin/fish' not in shell_current_user_shell.stdout"
+  when: "'/opt/homebrew/bin/fish' not in common_shell_current_user_shell.stdout"

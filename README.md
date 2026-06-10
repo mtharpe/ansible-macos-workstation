@@ -126,7 +126,7 @@ ansible-playbook --syntax-check setup_workstation.yml
 - Add/remove brew formulae: `vars/vars.yml` (`homebrew_formulae`)
 - Add/remove brew casks: `vars/vars.yml` (`homebrew_casks` for unconditional, or add an `install_*` flag and an entry in `roles/third-party/tasks/main.yml`)
 - macOS tweaks: `roles/macos/tasks/{defaults,finder,dock,menubar,keyboard,trackpad,screenshots}.yml`
-- Dotfiles: drop a `.j2` into `templates/` and reference it from a role task
+- Dotfiles: drop a `.j2` into `roles/common/templates/` and reference it from a role task
 
 ## Manual steps
 

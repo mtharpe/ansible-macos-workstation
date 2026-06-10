@@ -5,13 +5,14 @@ driver:
   name: podman
 platforms:
   - name: instance
-    image: ubuntu:24.04
+    image: localhost/custom-macos-ansible-runner
     privileged: true
-    command: /bin/bash -c "while true; do sleep 30; done"
+    command: sleep infinity
 provisioner:
   name: ansible
   env:
     ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/roles"
+    ANSIBLE_REMOTE_TMP: "/tmp"
   playbooks:
     converge: converge.yml
 verifier:

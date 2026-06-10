@@ -22,10 +22,10 @@
       [ -e "$app" ] || continue
       app_name="$(basename "$app")"
       dest_app="{{ ansible_facts['env']['HOME'] }}/Applications/$app_name"
-      
+
       # Create the wrapper directory
       mkdir -p "$dest_app"
-      
+
       # Symlink Contents folder inside it
       ln -sfh "$app/Contents" "$dest_app/Contents"
     done
@@ -97,36 +97,36 @@
 # Dock reports zero changes on the second run.
 - name: Locate dockutil
   ansible.builtin.command: which dockutil
-  register: dockutil_bin
+  register: macos_dockutil_bin
   changed_when: false
-  failed_when: dockutil_bin.rc != 0
+  failed_when: macos_dockutil_bin.rc != 0
 
 - name: Read current Dock contents
-  ansible.builtin.command: "{{ dockutil_bin.stdout }} --list"
-  register: dock_current
+  ansible.builtin.command: "{{ macos_dockutil_bin.stdout }} --list"
+  register: macos_dock_current
   changed_when: false
 
 - name: Remove system Applications folder from Dock
-  ansible.builtin.command: "{{ dockutil_bin.stdout }} --remove '/Applications' --no-restart"
-  when: "'file:///Applications/' in dock_current.stdout"
-  register: system_apps_dock_removed
-  changed_when: system_apps_dock_removed.rc == 0
+  ansible.builtin.command: "{{ macos_dockutil_bin.stdout }} --remove '/Applications' --no-restart"
+  when: "'file:///Applications/' in macos_dock_current.stdout"
+  register: macos_system_apps_dock_removed
+  changed_when: macos_system_apps_dock_removed.rc == 0
   notify: Restart Dock
 
 - name: Add Dock app entries (only if missing)
   ansible.builtin.command: >
-    {{ dockutil_bin.stdout }} --add "{{ item }}" --no-restart
+    {{ macos_dockutil_bin.stdout }} --add "{{ item }}" --no-restart
   loop: "{{ macos_dock_apps | default([]) }}"
   loop_control:
     label: "{{ item }}"
-  when: (item | basename | regex_replace('\\.app$', '')) not in dock_current.stdout
-  register: dock_app_added
-  changed_when: dock_app_added.rc == 0
+  when: (item | basename | regex_replace('\\.app$', '')) not in macos_dock_current.stdout
+  register: macos_dock_app_added
+  changed_when: macos_dock_app_added.rc == 0
   notify: Restart Dock
 
 - name: Add Dock folders / stacks (only if missing)
   ansible.builtin.command: >
-    {{ dockutil_bin.stdout }} --add "{{ item.path }}"
+    {{ macos_dockutil_bin.stdout }} --add "{{ item.path }}"
     --view {{ item.view | default('auto') }}
     --display {{ item.display | default('folder') }}
     --sort {{ item.sort | default('name') }}
@@ -134,7 +134,7 @@
   loop: "{{ macos_dock_folders | default([]) }}"
   loop_control:
     label: "{{ item.path }}"
-  when: ("file://" + (item.path | replace('~', ansible_facts['env']['HOME']))) not in dock_current.stdout
-  register: dock_folder_added
-  changed_when: dock_folder_added.rc == 0
+  when: ("file://" + (item.path | replace('~', ansible_facts['env']['HOME']))) not in macos_dock_current.stdout
+  register: macos_dock_folder_added
+  changed_when: macos_dock_folder_added.rc == 0
   notify: Restart Dock

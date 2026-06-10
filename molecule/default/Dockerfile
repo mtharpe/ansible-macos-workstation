@@ -7,5 +7,5 @@ FROM docker.io/library/ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        python3 python3-apt sudo openssh-server ca-certificates \
+        python3 python3-apt sudo openssh-server ca-certificates git \
     && rm -rf /var/lib/apt/lists/*

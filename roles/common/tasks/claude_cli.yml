@@ -8,7 +8,7 @@
     url: https://claude.ai/install.sh
     method: HEAD
     status_code: [200, 301, 302]
-  register: claude_probe
+  register: common_claude_probe
   failed_when: false
   changed_when: false
   tags: [third_party, claude]
@@ -16,22 +16,22 @@
 - name: Note unreachable Claude installer
   ansible.builtin.debug:
     msg: "Claude installer unreachable — skipping."
-  when: claude_probe.status | default(0) != 200
+  when: common_claude_probe.status | default(0) != 200
   tags: [third_party, claude]
 
 - name: Check for existing Claude Code binary
   ansible.builtin.stat:
     path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
-  register: claude_bin_stat
+  register: common_claude_bin_stat
   tags: [third_party, claude]
 
-- name: Install Claude Code via official installer
+- name: Install Claude Code via official installer  # noqa: command-instead-of-module
   ansible.builtin.shell:
     cmd: curl -fsSL https://claude.ai/install.sh | bash
     creates: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
   when:
-    - claude_probe.status | default(0) == 200
-    - not claude_bin_stat.stat.exists
+    - common_claude_probe.status | default(0) == 200
+    - not common_claude_bin_stat.stat.exists
   tags: [third_party, claude]
 
 - name: Ensure ~/.claude exists
@@ -44,7 +44,7 @@
 # Seed only if missing — never clobber an existing settings.json the user
 # has hand-tuned. To re-seed, delete ~/.claude/settings.json and re-run.
 - name: Seed default Claude Code settings.json (only if missing)
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src: claude-settings.json
     dest: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
     mode: '0644'
