@@ -43,3 +43,7 @@
 - name: Setup git config
   ansible.builtin.import_tasks: git.yml
   when: install_git_config | default(true)
+
+- name: Setup Claude Code CLI
+  ansible.builtin.import_tasks: claude_cli.yml
+  when: install_claude_cli | default(true)

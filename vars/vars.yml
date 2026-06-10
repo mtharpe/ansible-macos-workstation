@@ -22,6 +22,7 @@ homebrew_formulae:
   - docker
   - docker-credential-helper
   - helm
+  - kubernetes-cli
   - hashicorp/tap/packer
   - hashicorp/tap/terraform
   - hashicorp/tap/terraform-ls
@@ -54,6 +55,12 @@ homebrew_formulae:
   # CLI Utilities
   - bat
   - coreutils
+  - findutils
+  - gawk
+  - gnu-sed
+  - gnu-tar
+  - grep
+  - gzip
   - curl
   - eza
   - ffmpeg
@@ -95,7 +102,8 @@ homebrew_casks:
 
 # Third-party application toggles. Each maps to a cask install in
 # roles/third-party. Toggle these per-machine without editing tasks.
-install_1password: true
+install_1password: false
+install_bitwarden: true
 install_bambu_studio: true
 install_chrome: true
 install_claude: true
@@ -114,6 +122,10 @@ install_twingate: true
 install_vagrant: true
 install_vscode: true
 install_zoom: true
+install_chef: false
+install_spotify: false
+install_claude_cli: true
+install_antigravity_ide: true
 
 # Casks whose lifecycle is owned by your org's MDM (Jamf, Intune, etc.).
 # At runtime we check /Library/Managed Preferences/ for a plist whose
@@ -171,8 +183,11 @@ install_git_config: true
 # Git Configuration
 git_user_name: "Michael Tharpe"
 git_user_email: "mtharpe@users.noreply.github.com"
-# Git signing key is managed by 1Password SSH agent
-git_gpg_program: "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+# Git signing program (empty since Bitwarden uses native ssh-keygen via SSH Agent)
+git_gpg_program: ""
+
+# SSH Identity Agent (for Bitwarden SSH Agent socket)
+ssh_identity_agent: "~/.bitwarden-ssh-agent.sock"
 
 # Fish Shell Configuration
 fish_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/fish"
@@ -215,7 +230,7 @@ macos_dock_apps:
 
 # Dock folders / stacks (right of separator)
 macos_dock_folders:
-  - path: /Applications
+  - path: ~/Applications
     display: folder    # folder | stack
     view: grid         # fan | grid | list | auto
     sort: name         # name | dateadded | datemodified | datecreated | kind

@@ -1,8 +1,28 @@
 # {{ ansible_managed }}
 # Fish shell configuration
 
-# PATH — prefer GNU coreutils/findutils/grep/sed from Homebrew
-export PATH="(brew --prefix coreutils)/libexec/gnubin:(brew --prefix findutils)/libexec/gnubin:(brew --prefix grep)/libexec/gnubin:(brew --prefix gnu-sed)/libexec/gnubin:$PATH"
+# Source system/done configurations
+if test -f ~/.config/fish/system.fish
+    source ~/.config/fish/system.fish
+end
+
+# Prefer GNU coreutils, findutils, grep, sed, tar, awk, gzip from Homebrew
+set -l brew_prefix (brew --prefix 2>/dev/null || echo "/opt/homebrew")
+for pkg in coreutils findutils gnu-sed gnu-tar grep gawk gzip
+    set -l gnubin "$brew_prefix/opt/$pkg/libexec/gnubin"
+    if test -d $gnubin
+        if not contains $gnubin $PATH
+            set -p PATH $gnubin
+        end
+    end
+end
+
+# Add ~/.local/bin to PATH
+if test -d ~/.local/bin
+    if not contains -- ~/.local/bin $PATH
+        set -p PATH ~/.local/bin
+    end
+end
 
 # Docker / Colima
 set -gx DOCKER_HOST "unix://{{ docker_socket_path }}"
@@ -63,3 +83,8 @@ end
 if test -f ~/.orbstack/shell/init2.fish
     source ~/.orbstack/shell/init2.fish 2>/dev/null
 end
+
+# SSH Agent integration
+{% if ssh_identity_agent | default('') != '' %}
+set -gx SSH_AUTH_SOCK (string replace -r '^~' "$HOME" "{{ ssh_identity_agent }}")
+{% endif %}

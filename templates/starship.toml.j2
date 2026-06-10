@@ -1,14 +1,16 @@
 # {{ ansible_managed }}
 
+# Don't print a new line at the start of the prompt
 add_newline = true
+
+# Scan Timeout
 scan_timeout = 10
+
+# Disable the package module, hiding it from the prompt completely
 
 [aws]
 format = '\[[$symbol($profile)(\($region\))(\[$duration\])]($style)\]'
-symbol = "  "
-disabled = true
-
-[azure]
+symbol = "  "
 disabled = true
 
 [cmake]
@@ -21,7 +23,7 @@ disabled = true
 
 [conda]
 format = '\[[$symbol$environment]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [crystal]
@@ -30,7 +32,7 @@ disabled = true
 
 [dart]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [deno]
@@ -38,12 +40,11 @@ format = '\[[$symbol($version)]($style)\]'
 disabled = true
 
 [directory]
-read_only = " "
+read_only = " "
 
 [docker_context]
 format = '\[[$symbol$context]($style)\]'
-symbol = " "
-disabled = true
+symbol = " "
 
 [dotnet]
 format = '\[[$symbol($version)(🎯 $tfm)]($style)\]'
@@ -51,12 +52,12 @@ disabled = true
 
 [elixir]
 format = '\[[$symbol($version \(OTP $otp_version\))]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [elm]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [erlang]
@@ -65,37 +66,34 @@ disabled = true
 
 [gcloud]
 format = '\[[$symbol$account(@$domain)(\($region\))]($style)\]'
-symbol = "  "
+symbol = "  "
 disabled = true
 
 [git_branch]
 format = '\[[$symbol$branch]($style)\]'
-symbol = " "
+symbol = " "
 
 [git_status]
 format = '([\[$all_status$ahead_behind\]]($style))'
 
 [golang]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
-disabled = true
+symbol = " "
 
 [helm]
 format = '\[[$symbol($version)]($style)\]'
-disabled = true
 
 [hg_branch]
 format = '\[[$symbol$branch]($style)\]'
-symbol = " "
+symbol = " "
 
 [java]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
-disabled = true
+symbol = " "
 
 [julia]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [kotlin]
@@ -111,16 +109,16 @@ disabled = true
 
 [memory_usage]
 format = '\[$symbol[$ram( | $swap)]($style)\]'
-symbol = " "
+symbol = " "
 
 [nim]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [nix_shell]
 format = '\[[$symbol$state( \($name\))]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [nodejs]
@@ -132,20 +130,20 @@ disabled = true
 
 [openstack]
 format = '\[[$symbol$cloud(\($project\))]($style)\]'
-disabled = true
 
 [package]
 format = '\[[$symbol$version]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [perl]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
 
 [php]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
+disabled = true
 
 [purescript]
 format = '\[[$symbol($version)]($style)\]'
@@ -153,7 +151,7 @@ disabled = true
 
 [python]
 format = '\[[${symbol}${pyenv_prefix}(${version})(\($virtualenv\))]($style)\]'
-symbol = " "
+symbol = " "
 
 [red]
 format = '\[[$symbol($version)]($style)\]'
@@ -161,19 +159,19 @@ disabled = true
 
 [ruby]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
 
 [rust]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
 
 [scala]
 format = '\[[$symbol($version)]($style)\]'
-symbol = " "
+symbol = " "
 disabled = true
 
 [shlvl]
-symbol = " "
+symbol = " "
 disabled = true
 
 [swift]
@@ -182,7 +180,7 @@ symbol = "ﯣ "
 disabled = true
 
 [terraform]
-symbol = " "
+symbol = " "
 format = '\[[$symbol$workspace]($style)\]'
 
 [time]
@@ -194,7 +192,7 @@ format = '\[[$user]($style)\]'
 disabled = true
 
 [vagrant]
-symbol = " "
+symbol = " "
 format = '\[[$symbol($version)]($style)\]'
 
 [vlang]

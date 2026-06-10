@@ -11,6 +11,12 @@
     dest: "{{ ansible_facts['env']['HOME'] }}/.config/fish/config.fish"
     mode: '0644'
 
+- name: Template system fish config (done notifications)
+  ansible.builtin.template:
+    src: system.fish.j2
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/fish/system.fish"
+    mode: '0644'
+
 - name: Check if fish is in /etc/shells
   ansible.builtin.command: grep -q "/opt/homebrew/bin/fish" /etc/shells
   register: shell_fish_in_shells

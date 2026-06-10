@@ -23,11 +23,19 @@
     scope: global
     value: ssh
 
-- name: Configure GPG SSH program (1Password)
+- name: Configure GPG SSH program
   community.general.git_config:
     name: gpg.ssh.program
     scope: global
     value: "{{ git_gpg_program }}"
+  when: git_gpg_program is defined and git_gpg_program != ""
+
+- name: Unset GPG SSH program if empty
+  community.general.git_config:
+    name: gpg.ssh.program
+    scope: global
+    state: absent
+  when: git_gpg_program is not defined or git_gpg_program == ""
 
 - name: Enable commit GPG signing
   community.general.git_config:

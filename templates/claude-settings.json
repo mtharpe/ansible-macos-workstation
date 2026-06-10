@@ -1,0 +1,40 @@
+{
+  "theme": "dark",
+  "skipAutoPermissionPrompt": true,
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "defaultMode": "auto",
+    "allow": [
+      "Bash(bash *)",
+      "Bash(sh *)",
+      "Bash(ssh *)",
+      "Bash(sshfs *)",
+      "Bash(ssh-keygen *)",
+      "Bash(ssh-add *)",
+      "Bash(ssh-copy-id *)",
+      "Bash(scp *)",
+      "Bash(sftp *)",
+      "Bash(rsync *)",
+      "Bash(mosh *)",
+      "Bash(ping *)",
+      "Bash(traceroute *)",
+      "Bash(nc *)",
+      "Bash(telnet *)",
+      "Bash(showmount *)",
+      "Bash(mount.nfs *)",
+      "Bash(umount.nfs *)",
+      "Bash(exportfs *)",
+      "Bash(nfsstat *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(http *)",
+      "Bash(https *)",
+      "Bash(httpie *)",
+      "Bash(git push:*)",
+      "Bash(git push)"
+    ]
+  }
+}

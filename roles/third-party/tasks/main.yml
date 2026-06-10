@@ -49,6 +49,7 @@
   vars:
     third_party_apps:
       - {flag: "{{ install_1password | default(false) }}", cask: 1password}
+      - {flag: "{{ install_bitwarden | default(false) }}", cask: bitwarden}
       - {flag: "{{ install_bambu_studio | default(false) }}", cask: bambu-studio}
       - {flag: "{{ install_chrome | default(false) }}", cask: google-chrome}
       - {flag: "{{ install_claude | default(false) }}", cask: claude}
@@ -75,6 +76,9 @@
       - {flag: "{{ install_vagrant | default(false) }}", cask: hashicorp-vagrant}
       - {flag: "{{ install_vscode | default(false) }}", cask: visual-studio-code}
       - {flag: "{{ install_zoom | default(false) }}", cask: zoom}
+      - {flag: "{{ install_spotify | default(false) }}", cask: spotify}
+      - {flag: "{{ install_chef | default(false) }}", cask: chef-workstation}
+      - {flag: "{{ install_antigravity_ide | default(false) }}", cask: antigravity-ide}
   when: ansible_facts['os_family'] == 'Darwin'
 
 # Remove apps the user doesn't want on the machine. Covers bundles
@@ -153,6 +157,24 @@
   when:
     - ansible_facts['os_family'] == 'Darwin'
     - enabled_third_party_casks | default([]) | length > 0
+
+- name: Ensure /usr/local/bin directory exists
+  ansible.builtin.file:
+    path: /usr/local/bin
+    state: directory
+    mode: '0755'
+  become: true
+  when: ansible_facts['os_family'] == 'Darwin'
+
+- name: Symlink code CLI tool for Visual Studio Code
+  ansible.builtin.file:
+    src: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+    dest: "/usr/local/bin/code"
+    state: link
+  become: true
+  when:
+    - ansible_facts['os_family'] == 'Darwin'
+    - install_vscode | default(true)
 
 - name: Install Mac App Store apps
   ansible.builtin.import_tasks: mas.yml

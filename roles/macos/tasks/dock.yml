@@ -1,4 +1,37 @@
 ---
+- name: Ensure user Applications directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/Applications"
+    state: directory
+    mode: '0755'
+
+- name: Sync user-installed apps as clean wrappers to user Applications directory
+  ansible.builtin.shell: |
+    set -eo pipefail
+    # Remove existing symlinks and managed wrapped apps
+    find "{{ ansible_facts['env']['HOME'] }}/Applications" -maxdepth 1 -name "*.app" -exec sh -c '
+      for d; do
+        if [ -L "$d/Contents" ] || [ -L "$d" ]; then
+          rm -rf "$d"
+        fi
+      done
+    ' sh {} +
+
+    # Create wrapped apps for each user-installed app in /Applications
+    for app in /Applications/*.app; do
+      [ -e "$app" ] || continue
+      app_name="$(basename "$app")"
+      dest_app="{{ ansible_facts['env']['HOME'] }}/Applications/$app_name"
+      
+      # Create the wrapper directory
+      mkdir -p "$dest_app"
+      
+      # Symlink Contents folder inside it
+      ln -sfh "$app/Contents" "$dest_app/Contents"
+    done
+  args:
+    executable: /bin/bash
+  changed_when: false
 # macOS sometimes writes `tilesize` as a real (float) when the user
 # adjusts the Dock size slider in System Settings, sometimes as an int.
 # osx_defaults rejects the write if the requested type doesn't match
@@ -73,6 +106,13 @@
   register: dock_current
   changed_when: false
 
+- name: Remove system Applications folder from Dock
+  ansible.builtin.command: "{{ dockutil_bin.stdout }} --remove '/Applications' --no-restart"
+  when: "'file:///Applications/' in dock_current.stdout"
+  register: system_apps_dock_removed
+  changed_when: system_apps_dock_removed.rc == 0
+  notify: Restart Dock
+
 - name: Add Dock app entries (only if missing)
   ansible.builtin.command: >
     {{ dockutil_bin.stdout }} --add "{{ item }}" --no-restart
@@ -94,7 +134,7 @@
   loop: "{{ macos_dock_folders | default([]) }}"
   loop_control:
     label: "{{ item.path }}"
-  when: (item.path | basename) not in dock_current.stdout
+  when: ("file://" + (item.path | replace('~', ansible_facts['env']['HOME']))) not in dock_current.stdout
   register: dock_folder_added
   changed_when: dock_folder_added.rc == 0
   notify: Restart Dock
