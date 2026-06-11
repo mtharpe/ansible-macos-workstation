@@ -186,8 +186,8 @@ git_user_email: "mtharpe@users.noreply.github.com"
 # Git signing program (empty since Bitwarden uses native ssh-keygen via SSH Agent)
 git_gpg_program: ""
 
-# SSH Identity Agent (for Bitwarden SSH Agent socket)
-ssh_identity_agent: "~/.bitwarden-ssh-agent.sock"
+# SSH Identity Agent (for 1Password SSH Agent socket)
+ssh_identity_agent: "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
 # Fish Shell Configuration
 fish_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/fish"
