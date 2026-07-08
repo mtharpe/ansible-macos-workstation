@@ -1,0 +1,23 @@
+---
+- name: Find Firefox default-release profile
+  ansible.builtin.find:
+    paths: "{{ ansible_facts['env']['HOME'] }}/Library/Application Support/Firefox/Profiles"
+    file_type: directory
+    patterns: "*.default-release"
+    recurse: false
+  register: firefox_profile
+
+- name: Warn when Firefox profile is missing
+  ansible.builtin.debug:
+    msg: >-
+      Firefox profile not found — launch Firefox once and re-run to install
+      the hardened user.js.
+  when: firefox_profile.files | length == 0
+
+- name: Deploy hardened Firefox user.js (Betterfox + overrides)
+  ansible.builtin.copy:
+    src: firefox-user.js
+    dest: "{{ firefox_profile.files[0].path }}/user.js"
+    mode: '0644'
+    backup: true
+  when: firefox_profile.files | length > 0
