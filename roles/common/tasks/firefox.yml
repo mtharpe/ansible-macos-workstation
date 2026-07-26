@@ -5,19 +5,19 @@
     file_type: directory
     patterns: "*.default-release"
     recurse: false
-  register: firefox_profile
+  register: common_firefox_profile
 
 - name: Warn when Firefox profile is missing
   ansible.builtin.debug:
     msg: >-
       Firefox profile not found — launch Firefox once and re-run to install
       the hardened user.js.
-  when: firefox_profile.files | length == 0
+  when: common_firefox_profile.files | length == 0
 
 - name: Deploy hardened Firefox user.js (Betterfox + overrides)
   ansible.builtin.copy:
     src: firefox-user.js
-    dest: "{{ firefox_profile.files[0].path }}/user.js"
+    dest: "{{ common_firefox_profile.files[0].path }}/user.js"
     mode: '0644'
     backup: true
-  when: firefox_profile.files | length > 0
+  when: common_firefox_profile.files | length > 0
