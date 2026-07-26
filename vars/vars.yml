@@ -183,11 +183,14 @@ install_git_config: true
 # Git Configuration
 git_user_name: "Michael Tharpe"
 git_user_email: "mtharpe@users.noreply.github.com"
-# Git signing program (empty since Bitwarden uses native ssh-keygen via SSH Agent)
+# Git signing program (empty: use native ssh-keygen via the macOS ssh-agent)
 git_gpg_program: ""
+# Git SSH signing key (on-disk public key; private key served by macOS ssh-agent)
+git_signing_key: "~/.ssh/id_rsa.pub"
 
-# SSH Identity Agent (for 1Password SSH Agent socket)
-ssh_identity_agent: "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+# SSH Identity Agent — empty: use the native macOS ssh-agent (login Keychain).
+# When empty, no custom IdentityAgent / SSH_AUTH_SOCK override is emitted.
+ssh_identity_agent: ""
 
 # Fish Shell Configuration
 fish_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/fish"

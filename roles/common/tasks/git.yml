@@ -23,6 +23,20 @@
     scope: global
     value: ssh
 
+- name: Configure SSH signing key
+  community.general.git_config:
+    name: user.signingkey
+    scope: global
+    value: "{{ git_signing_key }}"
+  when: git_signing_key is defined and git_signing_key != ""
+
+- name: Configure SSH allowed signers file (for local signature verification)
+  community.general.git_config:
+    name: gpg.ssh.allowedSignersFile
+    scope: global
+    value: "~/.ssh/allowed_signers"
+  when: git_signing_key is defined and git_signing_key != ""
+
 - name: Configure GPG SSH program
   community.general.git_config:
     name: gpg.ssh.program

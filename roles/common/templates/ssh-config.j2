@@ -6,7 +6,12 @@ Include ~/.orbstack/ssh/config
 
 Include {{ ansible_facts['env']['HOME'] }}/.colima/ssh_config
 Host *
+        User tharpem
         StrictHostKeyChecking no
 {% if ssh_identity_agent | default('') != '' %}
         IdentityAgent "{{ ssh_identity_agent }}"
+{% else %}
+        AddKeysToAgent yes
+        UseKeychain yes
+        IdentityFile ~/.ssh/id_rsa
 {% endif %}
