@@ -103,7 +103,7 @@ homebrew_casks:
 # Third-party application toggles. Each maps to a cask install in
 # roles/third-party. Toggle these per-machine without editing tasks.
 install_1password: false
-install_bitwarden: true
+install_bitwarden: false
 install_bambu_studio: true
 install_chrome: true
 install_claude: true
