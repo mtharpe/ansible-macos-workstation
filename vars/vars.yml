@@ -102,7 +102,17 @@ homebrew_casks:
 
 # Third-party application toggles. Each maps to a cask install in
 # roles/third-party. Toggle these per-machine without editing tasks.
+# 1Password is installed MANUALLY, not via brew — leave this false.
+# The stable cask ships no AutoFill credential-provider extension, so
+# 1Password can't be the macOS system password/passkey provider; that
+# extension is beta-only as of 8.12.30-19.BETA (Jul 2026). Brew-installing
+# either cask fights the app's own updater and loses. Installed from
+# https://downloads.1password.com/mac/1Password-8.12.30-19.BETA-aarch64.zip
+# with Settings > Advanced > Release channel = Beta so it self-updates.
+# Flip this back to true (and drop onepassword_cask) once native macOS
+# AutoFill reaches stable.
 install_1password: false
+onepassword_cask: "1password@beta"
 install_bitwarden: false
 install_bambu_studio: true
 install_chrome: true
@@ -184,13 +194,15 @@ install_git_config: true
 git_user_name: "Michael Tharpe"
 git_user_email: "mtharpe@users.noreply.github.com"
 # Git signing program (empty: use native ssh-keygen via the macOS ssh-agent)
-git_gpg_program: ""
-# Git SSH signing key (on-disk public key; private key served by macOS ssh-agent)
-git_signing_key: "~/.ssh/id_rsa.pub"
+git_gpg_program: "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+# Git SSH signing key. With 1Password signing this must be the literal public
+# key; op-ssh-sign matches it against the SSH key items in the vault.
+git_signing_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDF6TgXsSfUA+L/yuch8EoU697k2ac2AUITm6ctXXEnYFn1o235RNy426IOjbDaiqg2TSzbHrLbHNBybP1bCFKwJBiXKCcYkbeS7p2Rmbc338j3xoi6qD4VdZrMie9zK0KETaHZN9Pk/UZGxz48le9BB5lDVqJMOIOYFuTFr62tHthmbw2BRUzdu6Mtn6o1YtwVQmWQ4ZcWkrtMbzZztnd/mgH+80jEZltGMVMuGwTomybZP2MwxuUA5pQMrT2gSPqYlXHY13twh93sSycnVENoc70KYqMqvp3IKUKi41dSX2tU7KbPsrmDGcthDMNwGgMp0RASKxhJ7HSVkE3/PeqqkpGj+LqnjBEi2T+yiUYHaGxu9sBOS6nSQ4T3U7eincX/CKzUtx1PGwaxEdamNa9sNAHVAL6jsF5/PHaCOusShSMnOpGijN87Pd3CEFoDZQCmTRhWr4QennwRCNJrVewQEhby+L4uqr/jeIyy90LOCNBBIQVzTbmpBI6r/cVj+DAmM1Un0aBPCIO3FEErifKzg0VOzPv5JrK4fT8Fl7mUDA9Lhs6TPl7XrCUYALY2/rr0vrzru8RycBn0MB0VskY860eeBn+sXLMynPgveQi3+mH7/cQ/Eo3hdwTZnHUe1+jraV8yC9mMkGFjWxwYbWEt+ATd4VV2/ds0TvlJsm0uUQ== mtharpe@gmail.com"
 
-# SSH Identity Agent — empty: use the native macOS ssh-agent (login Keychain).
-# When empty, no custom IdentityAgent / SSH_AUTH_SOCK override is emitted.
-ssh_identity_agent: ""
+# SSH Identity Agent — the 1Password SSH agent socket. Emits IdentityAgent in
+# ssh_config and an SSH_AUTH_SOCK override in config.fish. Set to "" to fall
+# back to the native macOS ssh-agent (login Keychain).
+ssh_identity_agent: "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
 # Fish Shell Configuration
 fish_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/fish"
