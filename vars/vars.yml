@@ -47,9 +47,10 @@ homebrew_formulae:
   - pkgconf
 
   # Shell & Terminal
-  # Prompt is fisher + pure-fish/pure (installed via roles/common/tasks/shell.yml),
-  # kept in step with ansible-fedora-workstation-base.
+  # Prompt is starship — config rendered from
+  # roles/common/templates/starship.toml.j2 (mirror of the Fedora repo).
   - fish
+  - starship
   - tmux
 
   # CLI Utilities — the coreutils/findutils/gawk/gnu-sed/gnu-tar/grep/gzip
@@ -173,6 +174,7 @@ mas_apps:
 
 # Shell / dotfile toggles
 install_fish: true
+install_starship: true
 install_tmux: true
 install_ghostty_config: true
 install_htop_config: true

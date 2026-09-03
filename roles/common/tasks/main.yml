@@ -18,6 +18,10 @@
   ansible.builtin.import_tasks: tmux.yml
   when: install_tmux | default(true)
 
+- name: Setup starship
+  ansible.builtin.import_tasks: starship.yml
+  when: install_starship | default(true)
+
 - name: Setup ghostty config
   ansible.builtin.import_tasks: ghostty.yml
   when: install_ghostty_config | default(true)

@@ -42,16 +42,3 @@
     shell: /opt/homebrew/bin/fish
   become: true
   when: "'/opt/homebrew/bin/fish' not in common_shell_current_user_shell.stdout"
-
-# Fisher + pure-fish/pure. Kept parallel with
-# ansible-fedora-workstation-base/roles/common/tasks/fish.yml so both machines
-# render the same prompt. The `creates:` on fisher.fish is the idempotency
-# check — once fisher is present we never re-run this shell command.
-- name: Install Fisher and pure-fish/pure  # noqa: command-instead-of-module
-  ansible.builtin.shell:
-    cmd: >-
-      curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source &&
-      fisher install jorgebucaran/fisher &&
-      fisher install pure-fish/pure
-    executable: /opt/homebrew/bin/fish
-    creates: "{{ ansible_facts['env']['HOME'] }}/.config/fish/functions/fisher.fish"

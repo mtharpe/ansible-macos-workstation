@@ -1,0 +1,203 @@
+# {{ ansible_managed }}
+
+# Don't print a new line at the start of the prompt
+add_newline = true
+
+# Scan Timeout
+scan_timeout = 10
+
+# Disable the package module, hiding it from the prompt completely
+
+[aws]
+format = '\[[$symbol($profile)(\($region\))(\[$duration\])]($style)\]'
+symbol = "  "
+disabled = true
+
+[cmake]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[cmd_duration]
+format = "[⏱ $duration]($style)"
+disabled = true
+
+[conda]
+format = '\[[$symbol$environment]($style)\]'
+symbol = " "
+disabled = true
+
+[crystal]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[dart]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+disabled = true
+
+[deno]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[directory]
+read_only = " "
+
+[docker_context]
+format = '\[[$symbol$context]($style)\]'
+symbol = " "
+
+[dotnet]
+format = '\[[$symbol($version)(🎯 $tfm)]($style)\]'
+disabled = true
+
+[elixir]
+format = '\[[$symbol($version \(OTP $otp_version\))]($style)\]'
+symbol = " "
+disabled = true
+
+[elm]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+disabled = true
+
+[erlang]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[gcloud]
+format = '\[[$symbol$account(@$domain)(\($region\))]($style)\]'
+symbol = "  "
+disabled = true
+
+[git_branch]
+format = '\[[$symbol$branch]($style)\]'
+symbol = " "
+
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style))'
+
+[golang]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+
+[helm]
+format = '\[[$symbol($version)]($style)\]'
+
+[hg_branch]
+format = '\[[$symbol$branch]($style)\]'
+symbol = " "
+
+[java]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+
+[julia]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+disabled = true
+
+[kotlin]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[kubernetes]
+format = '\[[$symbol$context( \($namespace\))]($style)\]'
+
+[lua]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[memory_usage]
+format = '\[$symbol[$ram( | $swap)]($style)\]'
+symbol = " "
+
+[nim]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+disabled = true
+
+[nix_shell]
+format = '\[[$symbol$state( \($name\))]($style)\]'
+symbol = " "
+disabled = true
+
+[nodejs]
+format = '\[[$symbol($version)]($style)\]'
+
+[ocaml]
+format = '\[[$symbol($version)(\($switch_indicator$switch_name\))]($style)\]'
+disabled = true
+
+[openstack]
+format = '\[[$symbol$cloud(\($project\))]($style)\]'
+
+[package]
+format = '\[[$symbol$version]($style)\]'
+symbol = " "
+disabled = true
+
+[perl]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+
+[php]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+disabled = true
+
+[purescript]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[python]
+format = '\[[${symbol}${pyenv_prefix}(${version})(\($virtualenv\))]($style)\]'
+symbol = " "
+
+[red]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[ruby]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+
+[rust]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+
+[scala]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+disabled = true
+
+[shlvl]
+symbol = " "
+disabled = true
+
+[swift]
+format = '\[[$symbol($version)]($style)\]'
+symbol = "ﯣ "
+disabled = true
+
+[terraform]
+symbol = " "
+format = '\[[$symbol$workspace]($style)\]'
+
+[time]
+format = '\[[$time]($style)\]'
+disabled = true
+
+[username]
+format = '\[[$user]($style)\]'
+disabled = true
+
+[vagrant]
+symbol = " "
+format = '\[[$symbol($version)]($style)\]'
+
+[vlang]
+format = '\[[$symbol($version)]($style)\]'
+disabled = true
+
+[zig]
+format = '\[[$symbol($version)]($style)\]'

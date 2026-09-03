@@ -84,16 +84,11 @@ function tfnew --description "Create a new Terraform project directory and files
     echo "Terraform project '$dir_name' created successfully."
 end
 
-# Prompt: pure-fish/pure via fisher. Installed by roles/common/tasks/shell.yml.
-# Pure's prompt functions live in ~/.config/fish/functions and conf.d and are
-# autoloaded by fish — no source needed. These vars tune its appearance.
-if status is-interactive
-    set -g pure_show_system_time true
-    set --universal pure_show_numbered_git_indicator true
-    set --universal pure_symbol_git_dirty '*'
-    set --universal pure_symbol_git_stash '≡'
-    set --universal pure_symbol_git_unpulled_commits '⇣'
-    set --universal pure_symbol_git_unpushed_commits '⇡'
+# Prompt + tooling integrations. starship reads ~/.config/starship.toml,
+# rendered from roles/common/templates/starship.toml.j2 (mirror of the
+# Fedora repo's templates/starship.toml so both machines look the same).
+if type -q starship
+    starship init fish | source
 end
 
 if type -q direnv
