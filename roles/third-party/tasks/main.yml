@@ -48,7 +48,7 @@
     disabled_third_party_casks: "{{ third_party_apps | rejectattr('flag', 'equalto', true) | map(attribute='cask') | reject('in', skip_casks | default([])) | list }}"
   vars:
     third_party_apps:
-      - {flag: "{{ install_1password | default(false) }}", cask: 1password}
+      - {flag: "{{ install_1password | default(false) }}", cask: "{{ onepassword_cask | default('1password') }}"}
       - {flag: "{{ install_bitwarden | default(false) }}", cask: bitwarden}
       - {flag: "{{ install_bambu_studio | default(false) }}", cask: bambu-studio}
       - {flag: "{{ install_chrome | default(false) }}", cask: google-chrome}

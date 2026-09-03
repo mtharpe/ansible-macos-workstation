@@ -24,8 +24,11 @@ if test -d ~/.local/bin
     end
 end
 
-# Docker / Colima
-set -gx DOCKER_HOST "unix://{{ docker_socket_path }}"
+# Docker / OrbStack
+# OrbStack provides the socket at /var/run/docker.sock; the orbstack context is
+# used instead of DOCKER_HOST. Erase any stray DOCKER_HOST (e.g. leftover from a
+# removed Colima install) so docker uses the active context.
+set -e DOCKER_HOST
 
 # Abbreviations
 abbr -a python python3
@@ -38,8 +41,19 @@ alias la='eza -la --icons --git'
 alias lt='eza --tree --level=2 --icons'
 alias sum="shasum -a 256"
 alias ssh_keygen="ssh-keygen -b 4096 -C (date +%Y-%m-%d)"
-alias git_all="printf '\\n' && find . -maxdepth 4 -type d -name '.git' -execdir python3 -c 'import os; from termcolor import colored, cprint; cprint(colored(os.path.abspath(\".\"), \"blue\"))' \; -execdir git pull \;"
 alias vault_login='vault login -method=userpass username={{ local_user }}'
+
+# `git pull` in every git repo under CWD (up to 4 dirs deep).
+function git_all --description "git pull in every repo under CWD"
+    printf '\n'
+    for gitdir in (find . -maxdepth 4 -type d -name .git)
+        set -l repo (dirname $gitdir)
+        set_color blue
+        realpath $repo
+        set_color normal
+        git -C $repo pull
+    end
+end
 
 # Terraform project scaffold
 function tfnew --description "Create a new Terraform project directory and files"
@@ -70,9 +84,19 @@ function tfnew --description "Create a new Terraform project directory and files
     echo "Terraform project '$dir_name' created successfully."
 end
 
-# Prompt + tooling integrations
-if type -q starship
-    starship init fish | source
+# Prompt: pure-fish/pure via fisher. Installed by roles/common/tasks/shell.yml.
+# The functions -q guard keeps early sessions from erroring if fisher hasn't
+# been installed yet (e.g. during a fresh bootstrap before the playbook ran).
+if status is-interactive
+    if functions -q fisher
+        source (fisher path)/pure.fish
+        set -g pure_show_system_time true
+        set --universal pure_show_numbered_git_indicator true
+        set --universal pure_symbol_git_dirty '*'
+        set --universal pure_symbol_git_stash '≡'
+        set --universal pure_symbol_git_unpulled_commits '⇣'
+        set --universal pure_symbol_git_unpushed_commits '⇡'
+    end
 end
 
 if type -q direnv

@@ -11,79 +11,71 @@ ansible_managed: "Ansible managed — do not edit by hand"
 # Homebrew taps — third-party formula sources
 homebrew_taps:
   - hashicorp/tap
-  - tonidy/tools-tap
-  - weaveworks/tap
 
-# Homebrew formulae (command-line tools)
+# Homebrew formulae (command-line tools).
+# Kept in step with ansible-fedora-workstation-base — Fedora is the reference
+# list. Only add things here that either exist in the Fedora playbook, or that
+# Mac needs to reach parity with something Fedora gets by default (the GNU
+# coreutils block, `make`, `curl`) or Mac-only tooling with no Linux analogue
+# (`dockutil`, `mas`).
 homebrew_formulae:
   # Cloud & Container Tools
-  - awscli
-  - colima
+  # Container runtime is OrbStack (install_orbstack), not colima/lima.
   - docker
   - docker-credential-helper
-  - helm
   - kubernetes-cli
+  - hashicorp/tap/consul
+  - hashicorp/tap/nomad
   - hashicorp/tap/packer
   - hashicorp/tap/terraform
-  - hashicorp/tap/terraform-ls
-  - hashicorp/tap/tf-migrate
-  - hashicorp/tap/tfstacks
   - hashicorp/tap/vault
-  - lima-additional-guestagents
-  - opentofu
-  - weaveworks/tap/eksctl
 
   # Development Tools
+  - ansible
+  - ansible-lint
   - autoconf  # noqa: nothing  (explicit list, kept for parity)
   - automake
   - cmake
   - direnv
   - gh
   - git
-  - git-lfs
+  - go
   - make
   - neovim
-  - shellcheck
-  - termcolor
-  - wails
+  - node        # required by the Electron apps in ~/.google-apps-src
+  - pipx        # hosts demucs, git-story
+  - pkgconf
 
   # Shell & Terminal
+  # Prompt is fisher + pure-fish/pure (installed via roles/common/tasks/shell.yml),
+  # kept in step with ansible-fedora-workstation-base.
   - fish
-  - starship
   - tmux
 
-  # CLI Utilities
+  # CLI Utilities — the coreutils/findutils/gawk/gnu-sed/gnu-tar/grep/gzip
+  # block gives macOS the GNU tools Fedora ships by default. `curl` is here
+  # because macOS's system curl lags. Everything else must appear in the
+  # Fedora packages list.
   - bat
   - coreutils
+  - curl
+  - eza
   - findutils
   - gawk
   - gnu-sed
   - gnu-tar
   - grep
   - gzip
-  - curl
-  - eza
-  - ffmpeg
   - htop
   - jq
   - nmap
   - p7zip
   - ripgrep
-  - tonidy/tools-tap/mkpasswd
-  - watch
-  - wget
-  - whois
+  - speedtest-cli
 
-  # Multimedia / Imaging
-  - ghostscript
-  - imagemagick
-  - cdrtools
-
-  # Dock management (used by macos role)
-  - dockutil
-
-  # Mac App Store CLI (used by third-party role for MAS apps)
-  - mas
+  # Mac-only tooling — no Linux equivalent needed on Fedora.
+  - dockutil          # Dock management (used by macos role)
+  - mas               # Mac App Store CLI (used by third-party role)
 
 # Homebrew casks (GUI applications) — installed unconditionally
 homebrew_casks:
@@ -91,7 +83,6 @@ homebrew_casks:
   - balenaetcher
   - gcloud-cli
   - ghostty
-  - ollama-app
   - sensiblesidebuttons
   # Nerd Fonts
   - font-fira-code-nerd-font
@@ -102,12 +93,22 @@ homebrew_casks:
 
 # Third-party application toggles. Each maps to a cask install in
 # roles/third-party. Toggle these per-machine without editing tasks.
+# 1Password is installed MANUALLY, not via brew — leave this false.
+# The stable cask ships no AutoFill credential-provider extension, so
+# 1Password can't be the macOS system password/passkey provider; that
+# extension is beta-only as of 8.12.30-19.BETA (Jul 2026). Brew-installing
+# either cask fights the app's own updater and loses. Installed from
+# https://downloads.1password.com/mac/1Password-8.12.30-19.BETA-aarch64.zip
+# with Settings > Advanced > Release channel = Beta so it self-updates.
+# Flip this back to true (and drop onepassword_cask) once native macOS
+# AutoFill reaches stable.
 install_1password: false
+onepassword_cask: "1password@beta"
 install_bitwarden: false
 install_bambu_studio: true
 install_chrome: true
 install_claude: true
-install_cleanmymac: false
+install_cleanmymac: true
 install_cursor: true
 install_google_drive: false
 install_inkscape: true
@@ -116,7 +117,7 @@ install_logi_options_plus: true
 # Outlook, and OneNote are force-removed. Handled in roles/third-party
 # (cask uninstall) and apps_to_remove (.app deletion) below.
 install_nextcloud: true
-install_orbstack: false
+install_orbstack: true
 install_slack: true
 install_twingate: true
 install_vagrant: true
@@ -172,7 +173,6 @@ mas_apps:
 
 # Shell / dotfile toggles
 install_fish: true
-install_starship: true
 install_tmux: true
 install_ghostty_config: true
 install_htop_config: true
@@ -184,17 +184,18 @@ install_git_config: true
 git_user_name: "Michael Tharpe"
 git_user_email: "mtharpe@users.noreply.github.com"
 # Git signing program (empty: use native ssh-keygen via the macOS ssh-agent)
-git_gpg_program: ""
-# Git SSH signing key (on-disk public key; private key served by macOS ssh-agent)
-git_signing_key: "~/.ssh/id_rsa.pub"
+git_gpg_program: "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+# Git SSH signing key. With 1Password signing this must be the literal public
+# key; op-ssh-sign matches it against the SSH key items in the vault.
+git_signing_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDF6TgXsSfUA+L/yuch8EoU697k2ac2AUITm6ctXXEnYFn1o235RNy426IOjbDaiqg2TSzbHrLbHNBybP1bCFKwJBiXKCcYkbeS7p2Rmbc338j3xoi6qD4VdZrMie9zK0KETaHZN9Pk/UZGxz48le9BB5lDVqJMOIOYFuTFr62tHthmbw2BRUzdu6Mtn6o1YtwVQmWQ4ZcWkrtMbzZztnd/mgH+80jEZltGMVMuGwTomybZP2MwxuUA5pQMrT2gSPqYlXHY13twh93sSycnVENoc70KYqMqvp3IKUKi41dSX2tU7KbPsrmDGcthDMNwGgMp0RASKxhJ7HSVkE3/PeqqkpGj+LqnjBEi2T+yiUYHaGxu9sBOS6nSQ4T3U7eincX/CKzUtx1PGwaxEdamNa9sNAHVAL6jsF5/PHaCOusShSMnOpGijN87Pd3CEFoDZQCmTRhWr4QennwRCNJrVewQEhby+L4uqr/jeIyy90LOCNBBIQVzTbmpBI6r/cVj+DAmM1Un0aBPCIO3FEErifKzg0VOzPv5JrK4fT8Fl7mUDA9Lhs6TPl7XrCUYALY2/rr0vrzru8RycBn0MB0VskY860eeBn+sXLMynPgveQi3+mH7/cQ/Eo3hdwTZnHUe1+jraV8yC9mMkGFjWxwYbWEt+ATd4VV2/ds0TvlJsm0uUQ== mtharpe@gmail.com"
 
-# SSH Identity Agent — empty: use the native macOS ssh-agent (login Keychain).
-# When empty, no custom IdentityAgent / SSH_AUTH_SOCK override is emitted.
-ssh_identity_agent: ""
+# SSH Identity Agent — the 1Password SSH agent socket. Emits IdentityAgent in
+# ssh_config and an SSH_AUTH_SOCK override in config.fish. Set to "" to fall
+# back to the native macOS ssh-agent (login Keychain).
+ssh_identity_agent: "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
 # Fish Shell Configuration
 fish_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/fish"
-docker_socket_path: "{{ ansible_facts['env']['HOME'] }}/.colima/default/docker.sock"
 
 # macOS toggles
 configure_macos_defaults: true
@@ -302,15 +303,8 @@ chrome_restore_on_startup: 5
 # Spotlight — exclude paths that churn constantly (build artifacts,
 # container volumes, caches). Reduces mds_stores CPU and disk I/O.
 macos_spotlight_excludes:
-  - "{{ ansible_facts['env']['HOME'] }}/.colima"
+  - "{{ ansible_facts['env']['HOME'] }}/.orbstack"
   - "{{ ansible_facts['env']['HOME'] }}/.docker"
   - "{{ ansible_facts['env']['HOME'] }}/.cache"
   - "{{ ansible_facts['env']['HOME'] }}/Library/Caches"
   - "{{ ansible_facts['env']['HOME'] }}/src"
-
-# Colima — pin VM memory so Docker doesn't claim half the box from
-# Chrome. Adjust per machine; 8 GiB / 4 CPU is a comfortable default
-# on a 24 GB host.
-colima_cpu: 4
-colima_memory_gib: 8
-colima_disk_gib: 100

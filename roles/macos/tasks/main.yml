@@ -69,12 +69,6 @@
     - ansible_facts['os_family'] == 'Darwin'
     - configure_macos_spotlight | default(true)
 
-- name: Pin Colima VM resources
-  ansible.builtin.import_tasks: colima.yml
-  when:
-    - ansible_facts['os_family'] == 'Darwin'
-    - not is_container | default(false)
-
 - name: Apply Chrome managed policies
   ansible.builtin.import_tasks: chrome.yml
   when:
