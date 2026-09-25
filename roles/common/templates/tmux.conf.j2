@@ -10,7 +10,8 @@ set -g @plugin 'tmux-plugins/tmux-sensible'
 run -b '~/.tmux/plugins/tpm/tpm'
 
 # Colors / mouse / keys
-set -g default-terminal 'screen-256color'
+set -g default-terminal 'tmux-256color'
+set -ga terminal-overrides ',xterm-ghostty:RGB'
 set-option -g mouse on
 setw -g mode-keys vi
 
@@ -24,6 +25,14 @@ set -g renumber-windows on
 
 # Cursor shape passthrough
 set -g -a terminal-overrides ',*:Ss=\E[%p1%d q:Se=\E[2 q'
+
+# Jump between shell prompts. Needs OSC 133 marks from Ghostty's shell
+# integration; tmux consumes them itself (Ghostty's jump_to_prompt can't
+# see them through tmux). -o variants jump to command output instead.
+bind -T copy-mode-vi '[' send-keys -X previous-prompt
+bind -T copy-mode-vi ']' send-keys -X next-prompt
+bind -T copy-mode-vi '{' send-keys -X previous-prompt -o
+bind -T copy-mode-vi '}' send-keys -X next-prompt -o
 
 # Scrollback
 set -g history-limit 10000

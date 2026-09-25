@@ -2,13 +2,25 @@
 # Ghostty Terminal Configuration
 
 font-family = "FiraCode Nerd Font"
-font-size = 17
-adjust-cell-height = 6%
+font-size = 18
+adjust-cell-height = 9%
 
 maximize
 title = "Terminal"
 
 desktop-notifications = false
 
-# Auto-attach (or create) tmux session 'main' on launch
-command = /opt/homebrew/bin/fish -l -c "tmux attach -t main || tmux new -s main"
+# Ghostty's own ssh wrapper: propagates COLORTERM/TERM_PROGRAM and installs
+# xterm-ghostty terminfo on remote hosts (falls back to xterm-256color)
+shell-integration-features = cursor,no-sudo,title,ssh-env,ssh-terminfo,path
+
+# Don't prompt for confirmation when closing a window/tab/quitting
+confirm-close-surface = false
+
+# Force fish integration: `detect` won't recognise tmux as a shell.
+shell-integration = fish
+
+# Launch tmux directly. Going via `fish -l -c` ran a NON-interactive fish,
+# which sourced Ghostty's vendor_conf.d, stripped the integration dir from
+# XDG_DATA_DIRS, then exited -- poisoning the env for the whole tmux server.
+command = /opt/homebrew/bin/tmux new-session -A -s main
