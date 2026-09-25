@@ -28,7 +28,7 @@
       mkdir -p "$dest_app"
 
       # Symlink Contents folder inside it
-      ln -sfh "$app/Contents" "$dest_app/Contents"
+      ln -sfn "$app/Contents" "$dest_app/Contents"
     done
   args:
     executable: /bin/bash
@@ -109,18 +109,26 @@
 
 - name: Remove system Applications folder from Dock
   ansible.builtin.command: "{{ macos_dockutil_bin.stdout }} --remove '/Applications' --no-restart"
-  when: "'file:///Applications/' in macos_dock_current.stdout"
+  when: macos_dock_current.stdout is search('\tfile:///Applications/\t')
   register: macos_system_apps_dock_removed
   changed_when: macos_system_apps_dock_removed.rc == 0
   notify: Restart Dock
 
-- name: Add Dock app entries (only if missing)
-  ansible.builtin.command: >
-    {{ macos_dockutil_bin.stdout }} --add "{{ item }}" --no-restart
+- name: Check which Dock apps are installed
+  ansible.builtin.stat:
+    path: "{{ item }}"
   loop: "{{ macos_dock_apps | default([]) }}"
+  register: macos_dock_apps_stat
+
+- name: Add Dock app entries (only if missing and installed)
+  ansible.builtin.command: >
+    {{ macos_dockutil_bin.stdout }} --add "{{ item.item }}" --no-restart
+  loop: "{{ macos_dock_apps_stat.results }}"
   loop_control:
-    label: "{{ item }}"
-  when: (item | basename | regex_replace('\\.app$', '')) not in macos_dock_current.stdout
+    label: "{{ item.item }}"
+  when:
+    - item.stat.exists
+    - (item.item | basename | regex_replace('\\.app$', '')) not in macos_dock_current.stdout
   register: macos_dock_app_added
   changed_when: macos_dock_app_added.rc == 0
   notify: Restart Dock
@@ -135,7 +143,7 @@
   loop: "{{ macos_dock_folders | default([]) }}"
   loop_control:
     label: "{{ item.path }}"
-  when: ("file://" + (item.path | replace('~', ansible_facts['env']['HOME']))) not in macos_dock_current.stdout
+  when: macos_dock_current.stdout is not search('\tfile://' + (item.path | replace('~', ansible_facts['env']['HOME']) | regex_replace('/$', '')) + '/\t')
   register: macos_dock_folder_added
   changed_when: macos_dock_folder_added.rc == 0
   notify: Restart Dock
